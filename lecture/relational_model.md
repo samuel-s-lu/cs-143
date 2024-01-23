@@ -1,0 +1,31 @@
+### Relations
+- a *relational database* consists of a collection of **relations** (often called tables)
+- each relation consists of sets of *tuples* (records)
+  - each tuple is a row
+  - tuples are unordered
+  - each tuple has one or more named *attributes* (columns/field) that are ordered
+
+### Keys
+- let $R$ be a relation with $n$ attributes $\cbrack{a_1,\dots a_n}$
+- *superkey* - a subset of the attributes of $R$ that uniquely identify each tuple in $R$
+  - there are usually a lot of superkeys (up to $2^n-1$)
+  - the trivial superkey is the one that includes all attributes
+  - the empty set is not a superkey
+- *candidate key* - a minimal superkey, i.e. one where no subset of its attributes is itself a superkey
+  - can be NULL, but NULLs must still uniquely identify a tuple
+- *primary key* - a candidate key that is chosen by the developer to enforce uniqueness based on data context
+  - properties:
+    - uniqueness - if the PK is composite, the values of the set of attributes must be unique
+    - NOT NULL - if the PK is composite, none of the values of the attributes can be null
+  - to pick a primary key:
+    - if one of the candidate key is created/maintained by the dev, that one is usually chosen
+    - if multiple candidate keys exist - shortest is chosen
+- RDBMS allows the user to set any unique, non-null set of attributes to be the PK
+  - so RDBMS will accept PKs that are not candidate keys
+- *foreign key* - a set of attributes in a referring relation that refers to the primary key of a referred relation
+  - *referential integrity* - if a foreign key value exists in the referring relation, the same value must exist in the primary key of the referred relation
+    - foreign keys can be used protect data in one relation from becoming orphaned/inconsistent due to changes in another relation
+  - the order of attributes in foreign and primary keys must match
+  - does *not* have to be unique
+    - but must refer to a unique key in the referred relation
+  - *can* be null
