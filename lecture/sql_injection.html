@@ -1,0 +1,186 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/default.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markdown-it-texmath/css/texmath.min.css">
+<link rel="stylesheet" href="file:////Users/samuellu/.vscode/extensions/goessner.mdmath-2.7.4/themes/default/style.css">
+
+</head>
+<body class="markdown-body">
+<h3 dir="auto" id="accessing-databases-from-applications">Accessing Databases from Applications</h3>
+<ul dir="auto">
+<li dir="auto">SWEs rarely interact directly with the database</li>
+<li dir="auto">typically we write software that interact with the database on our behalf</li>
+<li dir="auto"><strong>Connecting and Using Database</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-31-16-31-29.png" alt="" data-src="assets/2024-01-31-16-31-29.png">
+<ul dir="auto">
+<li dir="auto">cursor is stateful</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Fetching Records via a Cursor</strong>
+<ul dir="auto">
+<li dir="auto"><em>curcor</em> - provides trraversal over a result set</li>
+<li dir="auto">SQL standard provides two methods
+<ul dir="auto">
+<li dir="auto">fetchone() - fetches one row</li>
+<li dir="auto">fetchall() - fetches all rows</li>
+<li dir="auto">others exist in different SQL clients</li>
+</ul>
+</li>
+<li dir="auto">some problems with using cursors to maintain state
+<ul dir="auto">
+<li dir="auto">cursors keep database connection open, which wastes server resources</li>
+<li dir="auto">cursors keep the database in a transaction (again wasting resources)</li>
+<li dir="auto">thus auto-vacuum locks, and Postgress cannot garbage collection
+<ul dir="auto">
+<li dir="auto">leads to table bloat and poor performance</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Constructing SQL Queries</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-31-16-33-03.png" alt="" data-src="assets/2024-01-31-16-33-03.png">
+<ul dir="auto">
+<li dir="auto">none of the first 3 methods work
+<ul dir="auto">
+<li dir="auto">allows bad actors to input data that injects SQL commands
+<ul dir="auto">
+<li dir="auto">then they can destroy data
+<ul dir="auto">
+<li dir="auto"><code>; DROP DATABASE students</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">or break privacy
+<ul dir="auto">
+<li dir="auto"><code>OR 1=1; --</code>
+<ul dir="auto">
+<li dir="auto"><code>1=1</code> shortcircuits any conditions in an WHERE statement to steal all data</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">MUST use <em>prepared query</em>
+<ul dir="auto">
+<li dir="auto">pros:
+<ul dir="auto">
+<li dir="auto">faster when performing multiple queries of the same form
+<ul dir="auto">
+<li dir="auto">similar to using a compiled regex</li>
+<li dir="auto">like a template for a query</li>
+</ul>
+</li>
+<li dir="auto">prevents SQL injection</li>
+</ul>
+</li>
+<li dir="auto">escapes the special symbols in the input (meaning treat them like normal text)
+<ul dir="auto">
+<li dir="auto">whereas actual SQL commands are special text</li>
+<li dir="auto">e.g. <code>;</code>, <code>-</code>, etc are escaped</li>
+</ul>
+</li>
+<li dir="auto">other ways to prevent SQL injections:
+<ul dir="auto">
+<li dir="auto">remove all SQL keywords from input</li>
+<li dir="auto">escape all special characters in the input</li>
+<li dir="auto">best way is to do both</li>
+<li dir="auto">so these will create syntax errors instead of being injected with bad SQL</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Must Close Connection</strong>
+<ul dir="auto">
+<li dir="auto">can use context managers to ensure connection is closed
+<ul dir="auto">
+<li dir="auto">e.g. <code>with</code> in Python</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Python Example</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-31-16-54-47.png" alt="" data-src="assets/2024-01-31-16-54-47.png">
+<ul dir="auto">
+<li dir="auto">autocommit=True will execute each query as it comes</li>
+<li dir="auto">autocommit=False will cache all queries and execute in the end when you commit
+<ul dir="auto">
+<li dir="auto">this is atomic - so if any queries error, the state will be rolled back</li>
+</ul>
+</li>
+<li dir="auto"><code>%(major_input)</code> indicates we are pulling from a value from a dictionary corresponding to key <code>major_input</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Caching</strong>
+<ul dir="auto">
+<li dir="auto">often times if we are reusing data, we want to cache it (much faster)</li>
+<li dir="auto">app will often request data from cache first, and only if miss then request from DB
+<ul dir="auto">
+<li dir="auto">if miss then DB sends requested data to app and also to cache</li>
+</ul>
+</li>
+<li dir="auto">improve speed and lightens DB workload</li>
+</ul>
+</li>
+<li dir="auto"><strong>Logging</strong>
+<ul dir="auto">
+<li dir="auto">we want to log lots of data when building an app
+<ul dir="auto">
+<li dir="auto">e.g. impressions (views), interactions (clicks), conversions, visit path thru site, etc</li>
+</ul>
+</li>
+<li dir="auto">privacy
+<ul dir="auto">
+<li dir="auto">we want to maintain user privacy even when logging so much data</li>
+<li dir="auto">methods:
+<ul dir="auto">
+<li dir="auto">minimize number of copies of private info in logs</li>
+<li dir="auto">use join key everywhere else (such as UUID)</li>
+<li dir="auto">hash super private data such as SSN, credit card #
+<ul dir="auto">
+<li dir="auto">hashes are vulnerable to Rainbow table attacks
+<ul dir="auto">
+<li dir="auto">sol: use <strong>salt</strong> - a (usually randomized) string that is affixed to the data before it is hashed
+<ul dir="auto">
+<li dir="auto">different for every user</li>
+</ul>
+</li>
+<li dir="auto"><strong>pepper</strong> - similar to salt but stored in a separate table (or even in source code)
+<ul dir="auto">
+<li dir="auto">more difficult to steal than salt but not widely implemented</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">credit card numbers use <strong>tokenization</strong> - on first time use store CCN in DB and send to fintech gateway; fintech sends back a token that corresponds to the CCN and the app will use this token in future transactions</li>
+</ul>
+</li>
+<li dir="auto">have retention policies (delete data that's no longer needed)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</body>
+</html>

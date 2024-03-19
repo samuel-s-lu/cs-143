@@ -1,0 +1,956 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/default.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markdown-it-texmath/css/texmath.min.css">
+<link rel="stylesheet" href="file:////Users/samuellu/.vscode/extensions/goessner.mdmath-2.7.4/themes/default/style.css">
+
+</head>
+<body class="markdown-body">
+<h3 dir="auto" id="ansi-sql-data-types">ANSI SQL Data Types</h3>
+<ul dir="auto">
+<li dir="auto"><strong>numeric</strong>
+<ul dir="auto">
+<li dir="auto">int</li>
+<li dir="auto">smallint</li>
+<li dir="auto">numeric(p,d) - fixed point number which contains p digits, d of which comes after the decimal</li>
+<li dir="auto">real, double precision</li>
+<li dir="auto">float(n) - floating point number with precision of at least n digits</li>
+</ul>
+</li>
+<li dir="auto"><strong>string/text</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-22-17-19-29.png" alt="" data-src="assets/2024-01-22-17-19-29.png"></li>
+</ul>
+</li>
+<li dir="auto"><strong>binary</strong></li>
+<li dir="auto"><strong>date/time</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-22-17-19-14.png" alt="" data-src="assets/2024-01-22-17-19-14.png"></li>
+</ul>
+</li>
+<li dir="auto"><strong>null value</strong></li>
+</ul>
+<h3 dir="auto" id="postgresql-data-types">PostgreSQL Data Types</h3>
+<ul dir="auto">
+<li dir="auto">integers
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-22-17-20-50.png" alt="" data-src="assets/2024-01-22-17-20-50.png"></li>
+<li dir="auto">we want to be efficient to save space and plan for future use</li>
+<li dir="auto">want to start with smaller types and <em>promote</em> types to increase precision if needed
+<ul dir="auto">
+<li dir="auto">never <em>demote</em> which may limit precision</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">fixed-point
+<ul dir="auto">
+<li dir="auto">DECIMAL(p, d) - fixed point number which contains p digits, d of which comes after the decimal
+<ul dir="auto">
+<li dir="auto">aka numeric</li>
+<li dir="auto">p is called precision, and d is called scale</li>
+</ul>
+</li>
+<li dir="auto">NaN
+<ul dir="auto">
+<li dir="auto">NaN == NaN is true</li>
+<li dir="auto">NaN greater than all non-NaN values</li>
+</ul>
+</li>
+<li dir="auto">decimal/numeric is slow</li>
+</ul>
+</li>
+<li dir="auto">floating point
+<ul dir="auto">
+<li dir="auto">real and double precision</li>
+<li dir="auto"><img src="assets/2024-01-22-17-26-22.png" alt="" data-src="assets/2024-01-22-17-26-22.png"></li>
+</ul>
+</li>
+<li dir="auto">strings
+<ul dir="auto">
+<li dir="auto">char(n) and varchar(n)
+<ul dir="auto">
+<li dir="auto">char(n) will always use up n characters</li>
+<li dir="auto">but varchar(n) will only take k character storage spaces if you store a k character-length string</li>
+</ul>
+</li>
+<li dir="auto">n is counted in characters, not bytes</li>
+</ul>
+</li>
+<li dir="auto">binary
+<ul dir="auto">
+<li dir="auto">bytea</li>
+<li dir="auto">bit(n)</li>
+<li dir="auto">accepts hex or escape format</li>
+</ul>
+</li>
+<li dir="auto">boolean
+<ul dir="auto">
+<li dir="auto">TRUE, FALSE, or NULL</li>
+<li dir="auto"><img src="assets/2024-01-22-17-30-15.png" alt="" data-src="assets/2024-01-22-17-30-15.png"></li>
+</ul>
+</li>
+<li dir="auto">date and times
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-22-17-31-29.png" alt="" data-src="assets/2024-01-22-17-31-29.png"></li>
+<li dir="auto"><img src="assets/2024-01-22-17-32-44.png" alt="" data-src="assets/2024-01-22-17-32-44.png"></li>
+</ul>
+</li>
+<li dir="auto">enums
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-22-17-33-55.png" alt="" data-src="assets/2024-01-22-17-33-55.png"></li>
+<li dir="auto">properties
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-22-17-34-14.png" alt="" data-src="assets/2024-01-22-17-34-14.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">geometric/spatial types
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-22-17-36-04.png" alt="" data-src="assets/2024-01-22-17-36-04.png"></li>
+<li dir="auto">use case examples
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-22-17-36-20.png" alt="" data-src="assets/2024-01-22-17-36-20.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">JSON/XML as extra storage
+<ul dir="auto">
+<li dir="auto">in schema you can add an extra attribute that is a JSON blob
+<ul dir="auto">
+<li dir="auto">in this way you can insert any data related to a row but doesn't fit in the schema</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Casting</strong>
+<ul dir="auto">
+<li dir="auto">use <code>::</code> operator to cast values to another type</li>
+<li dir="auto"><code>gpa::decimal(4, 3) AS gpa</code></li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="database-management">Database Management</h3>
+<ul dir="auto">
+<li dir="auto"><strong>Creating a Table</strong>
+<ul dir="auto">
+<li dir="auto">syntax: CREATE TABLE</li>
+<li dir="auto">example:
+<ul dir="auto">
+<li dir="auto">youtube_video relation
+<ul dir="auto">
+<li dir="auto">upload date: timestamptz</li>
+<li dir="auto">video length: interval</li>
+<li dir="auto">description of vid: text</li>
+<li dir="auto">flag indicating if vid is public/public/unlisted: enum</li>
+<li dir="auto">video content itself: bytea</li>
+<li dir="auto">extra fields: jasonb</li>
+<li dir="auto">user location as lat/lon: point</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-01-22-17-44-55.png" alt="" data-src="assets/2024-01-22-17-44-55.png">
+<ul dir="auto">
+<li dir="auto">likes/dislikes/views should be: NOT NULL DEFAULT 0</li>
+<li dir="auto">privacy should be NOT NULL as well, or else the user can modify existing privacy attributes to NULL</li>
+<li dir="auto">if only one primary key, you can specify it in-line (e.g. next to video_id)</li>
+<li dir="auto">note: foreign key syntax!
+<ul dir="auto">
+<li dir="auto">must refer to an existing table</li>
+</ul>
+</li>
+<li dir="auto">ON DELETE CASCADE, ON UPDATE CASCADE
+<ul dir="auto">
+<li dir="auto">specified on the foreign key</li>
+<li dir="auto">when primary key in referred table is deleted/updated, the changes are casacded to rows in this table too</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">use keyword UNIQUE to ensure no duplicates in column</li>
+<li dir="auto">inline ver.</li>
+<li dir="auto"><img src="assets/2024-01-24-16-21-57.png" alt="" data-src="assets/2024-01-24-16-21-57.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Database CLI / Shell</strong>
+<ul dir="auto">
+<li dir="auto">most common for PostgreSQL is <code>psql</code></li>
+<li dir="auto">common <code>psql</code> commands:</li>
+<li dir="auto"><img src="assets/2024-01-24-16-07-24.png" alt="" data-src="assets/2024-01-24-16-07-24.png"></li>
+</ul>
+</li>
+<li dir="auto"><em>database</em> - forms physical partitions between unrelated data
+<ul dir="auto">
+<li dir="auto">relationships between any two databases are not allowed (unlike MySQL)</li>
+</ul>
+</li>
+<li dir="auto"><strong>schema</strong> - collection of tables that have similar use cases
+<ul dir="auto">
+<li dir="auto">you can join within and across schemas</li>
+</ul>
+</li>
+<li dir="auto"><strong>Changing a Schema</strong>
+<ul dir="auto">
+<li dir="auto">great care must be taken in designing database or table schema because it can be very inefficient to change them later</li>
+<li dir="auto">some rule of thumbs:
+<ul dir="auto">
+<li dir="auto">
+<ol dir="auto">
+<li dir="auto">promote never demote</li>
+</ol>
+</li>
+<li dir="auto">
+<ol start="2" dir="auto">
+<li dir="auto">don't delete columns - just abandon</li>
+</ol>
+<ul dir="auto">
+<li dir="auto">can be nulled out or just don't use</li>
+</ul>
+</li>
+<li dir="auto">
+<ol start="3" dir="auto">
+<li dir="auto">never add columns</li>
+</ol>
+<ul dir="auto">
+<li dir="auto">either create extra col with JSON blob</li>
+<li dir="auto">or create a 2nd table with a join key</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">generally don't rename attributes</li>
+<li dir="auto">ALTER TABLE allows us to:
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-16-25-11.png" alt="" data-src="assets/2024-01-24-16-25-11.png"></li>
+</ul>
+</li>
+<li dir="auto">example:</li>
+<li dir="auto"><img src="assets/2024-01-24-16-25-53.png" alt="" data-src="assets/2024-01-24-16-25-53.png">
+<ul dir="auto">
+<li dir="auto">DROP deletes column</li>
+<li dir="auto">ADD adds column</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-01-24-16-30-25.png" alt="" data-src="assets/2024-01-24-16-30-25.png"></li>
+<li dir="auto"><img src="assets/2024-01-24-16-30-52.png" alt="" data-src="assets/2024-01-24-16-30-52.png"></li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="intro-to-sql">Intro to SQL</h3>
+<ul dir="auto">
+<li dir="auto"><strong>SELECT</strong>
+<ul dir="auto">
+<li dir="auto">results of SELECT are ephemeral
+<ul dir="auto">
+<li dir="auto">data in table is not changed</li>
+<li dir="auto">exception is SELECT INTO</li>
+</ul>
+</li>
+<li dir="auto">example:
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-16-33-19.png" alt="" data-src="assets/2024-01-24-16-33-19.png"></li>
+<li dir="auto">SELECT DISTINCT is like <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Π</mi></mrow><annotation encoding="application/x-tex">\Pi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Π</span></span></span></span></li>
+<li dir="auto">WHERE is like <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi></mrow><annotation encoding="application/x-tex">\sigma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">σ</span></span></span></span> with condition <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ψ</mi></mrow><annotation encoding="application/x-tex">\psi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">ψ</span></span></span></span></li>
+</ul>
+</li>
+<li dir="auto">SELECT DISTINCT to remove duplicates
+<ul dir="auto">
+<li dir="auto">note that the DISTINCT is distributed across all columns</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Aliasing, Arithmetics, Functions</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-16-37-51.png" alt="" data-src="assets/2024-01-24-16-37-51.png"></li>
+<li dir="auto">if <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi></mrow><annotation encoding="application/x-tex">f</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span></span></span> is a function, you can use <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>v</mi><mi>i</mi><mi>e</mi><mi>w</mi><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f(views)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mord mathnormal">i</span><span class="mord mathnormal">e</span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> as well</li>
+</ul>
+</li>
+<li dir="auto"><strong>WHERE</strong>
+<ul dir="auto">
+<li dir="auto">uses the binary oeprators <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mo separator="true">,</mo><mo>≥</mo><mo separator="true">,</mo><mo>≤</mo><mo separator="true">,</mo><mo>&lt;</mo><mo separator="true">,</mo><mo>&gt;</mo></mrow><annotation encoding="application/x-tex">=, \geq, \leq, &lt;, &gt;</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mrel">=</span></span><span class="base"><span class="strut" style="height:0.8304em;vertical-align:-0.1944em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≥</span></span><span class="base"><span class="strut" style="height:0.8304em;vertical-align:-0.1944em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span></span><span class="base"><span class="strut" style="height:0.7335em;vertical-align:-0.1944em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span></span><span class="base"><span class="strut" style="height:0.7335em;vertical-align:-0.1944em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span></span></span></span>, !=</li>
+<li dir="auto">connect predicates with AND, OR</li>
+<li dir="auto">can test set membership via IN, NOT IN</li>
+<li dir="auto">test for NULL using IS NULL, IS NOT NULL</li>
+<li dir="auto">acts on attribute values to filters rows</li>
+<li dir="auto">use BETWEEN to combine <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≤</mo><mo separator="true">,</mo><mo>≥</mo></mrow><annotation encoding="application/x-tex">\leq, \geq</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7719em;vertical-align:-0.136em;"></span><span class="mrel">≤</span></span><span class="base"><span class="strut" style="height:0.8304em;vertical-align:-0.1944em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≥</span></span></span></span>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-16-41-30.png" alt="" data-src="assets/2024-01-24-16-41-30.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>ORDER BY</strong>
+<ul dir="auto">
+<li dir="auto">sorts the output by specified columns
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-16-43-34.png" alt="" data-src="assets/2024-01-24-16-43-34.png"></li>
+</ul>
+</li>
+<li dir="auto">defaults to sort by ascending order</li>
+<li dir="auto">can use DESC after colname, and LIMIT to truncate output
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-16-45-10.png" alt="" data-src="assets/2024-01-24-16-45-10.png"></li>
+</ul>
+</li>
+<li dir="auto">treatment of NULLs
+<ul dir="auto">
+<li dir="auto">add NULLS FIRST or NULLS LAST</li>
+<li dir="auto">NULLs treated larger than other values so NULLS LAST by default</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>GROUP BY</strong>
+<ul dir="auto">
+<li dir="auto">does aggregation</li>
+<li dir="auto">two kinds of aggregations
+<ul dir="auto">
+<li dir="auto">
+<ol dir="auto">
+<li dir="auto">aggregate over entire relation</li>
+</ol>
+<ul dir="auto">
+<li dir="auto"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mi>f</mi></msub><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\gamma_f(R)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0556em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mclose">)</span></span></span></span></li>
+<li dir="auto">don't need GROUP BY keyword
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-16-50-50.png" alt="" data-src="assets/2024-01-24-16-50-50.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">
+<ol start="2" dir="auto">
+<li dir="auto">aggregate over a certain group</li>
+</ol>
+<ul dir="auto">
+<li dir="auto"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mi>g</mi></msub><msub><mi>γ</mi><mi>f</mi></msub><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">_g\gamma_f(R)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">g</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0556em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mclose">)</span></span></span></span></li>
+<li dir="auto">needs GROUP BY keyword
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-16-52-16.png" alt="" data-src="assets/2024-01-24-16-52-16.png"></li>
+<li dir="auto"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow></mrow><mrow><mi>m</mi><mi>a</mi><mi>j</mi><mi>o</mi><mi>r</mi></mrow></msub><msub><mi>γ</mi><mrow><mi>A</mi><mi>V</mi><mi>G</mi><mo stretchy="false">(</mo><mi>g</mi><mi>p</mi><mi>a</mi><mo stretchy="false">)</mo><mo>→</mo><mi>a</mi><mi>v</mi><mi>e</mi><mi>r</mi><mi>a</mi><mi>g</mi><mi>e</mi></mrow></msub><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">_{major}\gamma_{AVG(gpa)\to average}(R)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.1052em;vertical-align:-0.3552em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">maj</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">or</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.5198em;margin-left:-0.0556em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">A</span><span class="mord mathnormal mtight" style="margin-right:0.22222em;">V</span><span class="mord mathnormal mtight">G</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">g</span><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight">a</span><span class="mclose mtight">)</span><span class="mrel mtight">→</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">er</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">g</span><span class="mord mathnormal mtight">e</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3552em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mclose">)</span></span></span></span></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><em>syntax rule</em>
+<ul dir="auto">
+<li dir="auto">as soon as you invoke an aggregation, <em>every</em> column in the SELECT must be either in the aggregation function or in the GROUP BY
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-16-56-10.png" alt="" data-src="assets/2024-01-24-16-56-10.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>HAVING</strong>
+<ul dir="auto">
+<li dir="auto"><em>very important</em></li>
+<li dir="auto">post-filters the result of aggregations
+<ul dir="auto">
+<li dir="auto">cannot use WHERE in this case</li>
+<li dir="auto">WHERE is like a pre-filter</li>
+<li dir="auto">only use HAVING if you have GROUP BY</li>
+<li dir="auto"><img src="assets/2024-01-24-17-00-21.png" alt="" data-src="assets/2024-01-24-17-00-21.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Combining Concepts</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-17-10-13.png" alt="" data-src="assets/2024-01-24-17-10-13.png"></li>
+<li dir="auto"><img src="assets/2024-01-24-17-10-36.png" alt="" data-src="assets/2024-01-24-17-10-36.png"></li>
+<li dir="auto">points to remember
+<ul dir="auto">
+<li dir="auto">column aliases can only be used in ORDER BY</li>
+<li dir="auto">write SQL query in this order:
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-17-12-13.png" alt="" data-src="assets/2024-01-24-17-12-13.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Order of Execution</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-17-12-50.png" alt="" data-src="assets/2024-01-24-17-12-50.png">
+<ul dir="auto">
+<li dir="auto">FROM, ON, JOIN reads data</li>
+<li dir="auto">GROUP BY create groups / apply functions</li>
+<li dir="auto">SELECT, DISTINCT creates aliases</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">tips on writing SQL queries
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-17-15-35.png" alt="" data-src="assets/2024-01-24-17-15-35.png"></li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="querying-multiple-tables-with-joins">Querying Multiple Tables with Joins</h3>
+<ul dir="auto">
+<li dir="auto">possible to do natural joins but VERY BAD PRACTICE
+<ul dir="auto">
+<li dir="auto">always explicit state join condition (i.e. use theta joins)</li>
+<li dir="auto">natural join is a SQL <em>anti-pattern</em>
+<ul dir="auto">
+<li dir="auto">purpose of query is not as readable</li>
+<li dir="auto">if you change schema/code you have to fix every natural join</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>INNER JOIN</strong>
+<ul dir="auto">
+<li dir="auto">INNER actually optional since it is the default JOIN</li>
+<li dir="auto">example:
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-17-21-26.png" alt="" data-src="assets/2024-01-24-17-21-26.png"></li>
+</ul>
+</li>
+<li dir="auto">we can also use aliases for readability
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-17-22-07.png" alt="" data-src="assets/2024-01-24-17-22-07.png"></li>
+<li dir="auto">notice there are both column and table aliases
+<ul dir="auto">
+<li dir="auto">you can use table aliases everywhere
+<ul dir="auto">
+<li dir="auto">but again, column aliases only in ORDER BY</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">can join on attributes not in SELECT</li>
+<li dir="auto">visual of INNER JOIN
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-17-24-51.png" alt="" data-src="assets/2024-01-24-17-24-51.png"></li>
+</ul>
+</li>
+<li dir="auto">if we toss all rows in <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span></span></span> that do not have a match in <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span>, it is an inner join
+<ul dir="auto">
+<li dir="auto">if we keep some it is an outer join</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Self Join</strong>
+<ul dir="auto">
+<li dir="auto">useful for data that represents graph, tree, network, DAG, etc</li>
+<li dir="auto">example: friend-of-a-friend (FOAF) problem</li>
+<li dir="auto"><img src="assets/2024-01-24-17-32-20.png" alt="" data-src="assets/2024-01-24-17-32-20.png">
+<ul dir="auto">
+<li dir="auto">first compute Cartesian product
+<ul dir="auto">
+<li dir="auto"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ρ</mi><mi>L</mi></msub><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo><mo>×</mo><mi>R</mi></mrow><annotation encoding="application/x-tex">\rho_L(R)\times R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">ρ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">L</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span></span></span></li>
+</ul>
+</li>
+<li dir="auto">write <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span></span></span></span> join condition
+<ul dir="auto">
+<li dir="auto"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi><mo>=</mo><mrow><mo fence="true">{</mo><mi>L</mi><mi mathvariant="normal">.</mi><mi>f</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo>=</mo><mi>R</mi><mi mathvariant="normal">.</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo>∧</mo><mi>L</mi><mi mathvariant="normal">.</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo mathvariant="normal">≠</mo><mi>R</mi><mi mathvariant="normal">.</mi><mi>f</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo fence="true">}</mo></mrow></mrow><annotation encoding="application/x-tex">\theta=\cbrack{L.fuid=R.uid\land L.uid\neq R.fuid}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">{</span><span class="mord mathnormal">L</span><span class="mord">.</span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mord mathnormal">u</span><span class="mord mathnormal">i</span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mord">.</span><span class="mord mathnormal">u</span><span class="mord mathnormal">i</span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∧</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal">L</span><span class="mord">.</span><span class="mord mathnormal">u</span><span class="mord mathnormal">i</span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel"><span class="mrel"><span class="mord vbox"><span class="thinbox"><span class="rlap"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="inner"><span class="mord"><span class="mrel"></span></span></span><span class="fix"></span></span></span></span></span><span class="mrel">=</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mord">.</span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mord mathnormal">u</span><span class="mord mathnormal">i</span><span class="mord mathnormal">d</span><span class="mclose delimcenter" style="top:0em;">}</span></span></span></span></span>
+<ul dir="auto">
+<li dir="auto">second condition checks for cycles (user is not FOAF of themselves)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">project output
+<ul dir="auto">
+<li dir="auto"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Π</mi><mrow><mi>L</mi><mi mathvariant="normal">.</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo>→</mo><mi>u</mi><mi>i</mi><mi>d</mi><mo separator="true">,</mo><mi>R</mi><mi mathvariant="normal">.</mi><mi>f</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo>→</mo><mi>f</mi><mi>o</mi><mi>a</mi><mi>f</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\Pi_{L.uid\to uid, R.fuid\to foaf}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord">Π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">L</span><span class="mord mtight">.</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mrel mtight">→</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span><span class="mord mtight">.</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mrel mtight">→</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">full relational algebra is
+<ul dir="auto">
+<li dir="auto"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Π</mi><mrow><mi>L</mi><mi mathvariant="normal">.</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo>→</mo><mi>u</mi><mi>i</mi><mi>d</mi><mo separator="true">,</mo><mi>R</mi><mi mathvariant="normal">.</mi><mi>f</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo>→</mo><mi>f</mi><mi>o</mi><mi>a</mi><mi>f</mi></mrow></msub><mo stretchy="false">(</mo><msub><mi>σ</mi><mrow><mi>L</mi><mi mathvariant="normal">.</mi><mi>f</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo>=</mo><mi>R</mi><mi mathvariant="normal">.</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo>∧</mo><mi>L</mi><mi mathvariant="normal">.</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo mathvariant="normal">≠</mo><mi>R</mi><mi mathvariant="normal">.</mi><mi>f</mi><mi>u</mi><mi>i</mi><mi>d</mi></mrow></msub><mo stretchy="false">(</mo><msub><mi>ρ</mi><mi>L</mi></msub><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo><mo>×</mo><mi>R</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\Pi_{L.uid\to uid, R.fuid\to foaf}(\sigma_{L.fuid=R.uid\land L.uid\neq R.fuid}(\rho_L(R)\times R))</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord">Π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">L</span><span class="mord mtight">.</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mrel mtight">→</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span><span class="mord mtight">.</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mrel mtight">→</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">L</span><span class="mord mtight">.</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mrel mtight">=</span><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span><span class="mord mtight">.</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mbin mtight">∧</span><span class="mord mathnormal mtight">L</span><span class="mord mtight">.</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mrel mtight"><span class="mrel mtight"><span class="mord vbox mtight"><span class="thinbox mtight"><span class="rlap mtight"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="inner"><span class="mord mtight"><span class="mrel mtight"></span></span></span><span class="fix"></span></span></span></span></span><span class="mrel mtight">=</span></span><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span><span class="mord mtight">.</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">ρ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">L</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mclose">))</span></span></span></span></li>
+<li dir="auto">or
+<ul dir="auto">
+<li dir="auto"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Π</mi><mrow><mi>L</mi><mi mathvariant="normal">.</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo>→</mo><mi>u</mi><mi>i</mi><mi>d</mi><mo separator="true">,</mo><mi>R</mi><mi mathvariant="normal">.</mi><mi>f</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo>→</mo><mi>f</mi><mi>o</mi><mi>a</mi><mi>f</mi></mrow></msub><mo stretchy="false">(</mo><msub><mi>ρ</mi><mi>L</mi></msub><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo><msub><mo>⋈</mo><mrow><mi>L</mi><mi mathvariant="normal">.</mi><mi>f</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo>=</mo><mi>R</mi><mi mathvariant="normal">.</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo>∧</mo><mi>L</mi><mi mathvariant="normal">.</mi><mi>u</mi><mi>i</mi><mi>d</mi><mo mathvariant="normal">≠</mo><mi>R</mi><mi mathvariant="normal">.</mi><mi>f</mi><mi>u</mi><mi>i</mi><mi>d</mi></mrow></msub><mi>R</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\Pi_{L.uid\to uid, R.fuid\to foaf}(\rho_L(R)\bowtie_{L.fuid=R.uid\land L.uid\neq R.fuid}R)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord">Π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">L</span><span class="mord mtight">.</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mrel mtight">→</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span><span class="mord mtight">.</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mrel mtight">→</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">ρ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">L</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel"><span class="mrel">⋈</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">L</span><span class="mord mtight">.</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mrel mtight">=</span><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span><span class="mord mtight">.</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mbin mtight">∧</span><span class="mord mathnormal mtight">L</span><span class="mord mtight">.</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mrel mtight"><span class="mrel mtight"><span class="mord vbox mtight"><span class="thinbox mtight"><span class="rlap mtight"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="inner"><span class="mord mtight"><span class="mrel mtight"></span></span></span><span class="fix"></span></span></span></span></span><span class="mrel mtight">=</span></span><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span><span class="mord mtight">.</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mclose">)</span></span></span></span></li>
+</ul>
+</li>
+<li dir="auto">so this is a self, nonequi, inner, theta join</li>
+</ul>
+</li>
+<li dir="auto">SQL query:
+<ul dir="auto">
+<li dir="auto">let the table be named <code>friends</code></li>
+<li dir="auto">no special SQL syntax for self join</li>
+<li dir="auto">
+<pre><code dir="auto">SELECT DISTINCT
+  L.user_id AS user,
+  R.friend_user_id AS foaf
+FROM friends L
+JOIN friends R
+ON L.friend_user_id = R. user_id AND
+   L.user_id != R.friend_user_id;
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Cross Join</strong>
+<ul dir="auto">
+<li dir="auto">strict Cartesian product with no selection <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi></mrow><annotation encoding="application/x-tex">\sigma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">σ</span></span></span></span> applied</li>
+<li dir="auto">very rare, very slow</li>
+<li dir="auto">possible use cases:
+<ul dir="auto">
+<li dir="auto">tinder</li>
+<li dir="auto">roommate finder</li>
+<li dir="auto">high school scheduling</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Outer Join</strong>
+<ul dir="auto">
+<li dir="auto">keep matches we find (like inner join), but also keep records that appear in one or both tables
+<ul dir="auto">
+<li dir="auto">left, right, or full join</li>
+<li dir="auto">data associated with the other table become all NULL</li>
+<li dir="auto"><img src="assets/2024-01-31-11-28-55.png" alt="" data-src="assets/2024-01-31-11-28-55.png"></li>
+</ul>
+</li>
+<li dir="auto">example:
+<ul dir="auto">
+<li dir="auto">bird scooters charge customers for each ride
+<ul dir="auto">
+<li dir="auto">each ride has start and should contain an end, but it may not
+<ul dir="auto">
+<li dir="auto">possible reasons:
+<ul dir="auto">
+<li dir="auto">can't transmit</li>
+<li dir="auto">stolen</li>
+<li dir="auto">dead battery</li>
+<li dir="auto">user never ends ride</li>
+<li dir="auto">phone dies</li>
+<li dir="auto">phone can't transmit</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-01-31-11-32-53.png" alt="" data-src="assets/2024-01-31-11-32-53.png">
+<ul dir="auto">
+<li dir="auto">suppose we only used one Trip table
+<ul dir="auto">
+<li dir="auto">at trip start, create a row in Trip and set all trip end cols to NULL</li>
+<li dir="auto">when trip ends, search table and replace NULLs with trip end data
+<ul dir="auto">
+<li dir="auto">searching may be slow</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">by separating tables we only need to append using outer join (faster)</li>
+<li dir="auto"><img src="assets/2024-01-31-11-36-25.png" alt="" data-src="assets/2024-01-31-11-36-25.png"></li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-01-31-11-37-49.png" alt="" data-src="assets/2024-01-31-11-37-49.png">
+<ul dir="auto">
+<li dir="auto"><code>OUTER</code> is optional</li>
+<li dir="auto">R.trip_id can be NULL, so we use L.trip_id AS trip_id</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">right outer join is symmetrical to left outer join
+<ul dir="auto">
+<li dir="auto">A leftouterjoin B <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>  </mtext><mo>⟺</mo><mtext>  </mtext></mrow><annotation encoding="application/x-tex">\iff</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.549em;vertical-align:-0.024em;"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">⟺</span><span class="mspace" style="margin-right:0.2778em;"></span></span></span></span> B rightouterjoin A</li>
+</ul>
+</li>
+<li dir="auto">full outer join combines results from left join and right join
+<ul dir="auto">
+<li dir="auto">returns all rows, matched or unmatched, from both sides of the join</li>
+<li dir="auto">rarely used</li>
+<li dir="auto">example:
+<ul dir="auto">
+<li dir="auto">want to find faculty who is not teaching so we can assigned a course for them</li>
+<li dir="auto">want to find and cut electives that have no teachers right now</li>
+<li dir="auto"><img src="assets/2024-01-31-11-49-47.png" alt="" data-src="assets/2024-01-31-11-49-47.png">
+<ul dir="auto">
+<li dir="auto">INNER returns instructors with courses</li>
+<li dir="auto">LEFT returns instructors with no courses</li>
+<li dir="auto">RIGHT returns courses with no instructors</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-01-31-11-51-47.png" alt="" data-src="assets/2024-01-31-11-51-47.png">
+<ul dir="auto">
+<li dir="auto">FULL join returns both faculty who are not teaching, as well as courses that have no faculty</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-01-31-11-52-47.png" alt="" data-src="assets/2024-01-31-11-52-47.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>COALESCE</strong>
+<ul dir="auto">
+<li dir="auto">in outer joins we may end up with NULL values</li>
+<li dir="auto">use COALESCE to replace NULL values with useful values</li>
+<li dir="auto"><code>COALESCE(expr that may be NULL, replacement value)</code>
+<ul dir="auto">
+<li dir="auto">can take multiple arguments, returning the first one that is not NULL</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Non-Equi Self Join as Window Functions</strong>
+<ul dir="auto">
+<li dir="auto">example:
+<ul dir="auto">
+<li dir="auto">we want to count number of chargebacks up to and including the transaction of interest in the past 4 days (5 days total)</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-01-31-13-10-23.png" alt="" data-src="assets/2024-01-31-13-10-23.png">
+<ul dir="auto">
+<li dir="auto">first construct all pairs of tuples <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ρ</mi><mi>L</mi></msub><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo><mo>×</mo><mi>R</mi></mrow><annotation encoding="application/x-tex">\rho_L(R)\times R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">ρ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">L</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span></span></span>
+<ul dir="auto">
+<li dir="auto">fix L then look backwards in time in R</li>
+</ul>
+</li>
+<li dir="auto">equijoin condition: customer_id</li>
+<li dir="auto">non-equijoin conditions:
+<ul dir="auto">
+<li dir="auto"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mi mathvariant="normal">.</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>n</mi><mi>s</mi><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi><mo>−</mo><mi>R</mi><mi mathvariant="normal">.</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>n</mi><mi>s</mi><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi><mo>+</mo><mn>1</mn><mo>≤</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">L.transtime-R.transtime+1\leq 5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">L</span><span class="mord">.</span><span class="mord mathnormal">t</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">an</span><span class="mord mathnormal">s</span><span class="mord mathnormal">t</span><span class="mord mathnormal">im</span><span class="mord mathnormal">e</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mord">.</span><span class="mord mathnormal">t</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">an</span><span class="mord mathnormal">s</span><span class="mord mathnormal">t</span><span class="mord mathnormal">im</span><span class="mord mathnormal">e</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7804em;vertical-align:-0.136em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span></span></span></span></li>
+<li dir="auto"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mi mathvariant="normal">.</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>n</mi><mi>s</mi><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi><mo>≤</mo><mi>L</mi><mi mathvariant="normal">.</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>n</mi><mi>s</mi><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi></mrow><annotation encoding="application/x-tex">R.transtime\leq L.transtime</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8193em;vertical-align:-0.136em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mord">.</span><span class="mord mathnormal">t</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">an</span><span class="mord mathnormal">s</span><span class="mord mathnormal">t</span><span class="mord mathnormal">im</span><span class="mord mathnormal">e</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">L</span><span class="mord">.</span><span class="mord mathnormal">t</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">an</span><span class="mord mathnormal">s</span><span class="mord mathnormal">t</span><span class="mord mathnormal">im</span><span class="mord mathnormal">e</span></span></span></span></li>
+</ul>
+</li>
+<li dir="auto">GROUP BY <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mi mathvariant="normal">.</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>n</mi><msub><mi>s</mi><mi>i</mi></msub><mi>d</mi><mo separator="true">,</mo><mi>L</mi><mi mathvariant="normal">.</mi><mi>c</mi><mi>u</mi><mi>s</mi><mi>t</mi><mi>o</mi><mi>m</mi><mi>e</mi><msub><mi>r</mi><mi>i</mi></msub><mi>d</mi></mrow><annotation encoding="application/x-tex">L.trans_id, L.customer_id</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">L</span><span class="mord">.</span><span class="mord mathnormal">t</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">an</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathnormal">d</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">L</span><span class="mord">.</span><span class="mord mathnormal">c</span><span class="mord mathnormal">u</span><span class="mord mathnormal">s</span><span class="mord mathnormal">t</span><span class="mord mathnormal">o</span><span class="mord mathnormal">m</span><span class="mord mathnormal">e</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathnormal">d</span></span></span></span></li>
+<li dir="auto">SUM over result</li>
+<li dir="auto">ORDER BY <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mi mathvariant="normal">.</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>n</mi><mi>s</mi><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi></mrow><annotation encoding="application/x-tex">L.transtime</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">L</span><span class="mord">.</span><span class="mord mathnormal">t</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">an</span><span class="mord mathnormal">s</span><span class="mord mathnormal">t</span><span class="mord mathnormal">im</span><span class="mord mathnormal">e</span></span></span></span> DESC</li>
+</ul>
+</li>
+<li dir="auto">result:
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-31-13-24-34.png" alt="" data-src="assets/2024-01-31-13-24-34.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">Summary of Joins
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-31-13-25-18.png" alt="" data-src="assets/2024-01-31-13-25-18.png"></li>
+</ul>
+</li>
+<li dir="auto"><strong>Rules for Exams</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-24-17-48-18.png" alt="" data-src="assets/2024-01-24-17-48-18.png"></li>
+<li dir="auto">do NOT use outer join for everything</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="nested-queries--subqueries">Nested Queries / Subqueries</h3>
+<ul dir="auto">
+<li dir="auto"><strong>Derived Table Subquery</strong>
+<ul dir="auto">
+<li dir="auto">returns a <em>table</em></li>
+<li dir="auto">example:
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-31-13-31-58.png" alt="" data-src="assets/2024-01-31-13-31-58.png"></li>
+<li dir="auto"><code>sq</code> is the <em>derived table alias</em> (REQUIRED)</li>
+<li dir="auto">we can use alias <code>average</code> in WHERE rather than using HAVING</li>
+<li dir="auto"><strong>don't do this</strong> - use one query with HAVING whenever possible</li>
+</ul>
+</li>
+<li dir="auto">innermost query always executes first</li>
+<li dir="auto"><em>subqueries</em> - allow us to use the result of one query as the input to another query
+<ul dir="auto">
+<li dir="auto">can be nested in SELECT, WHERE/HAVING, INSERT, UPDATE, DELETE, SET, DO statements, or in another subquery</li>
+<li dir="auto">used for:
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-31-13-37-22.png" alt="" data-src="assets/2024-01-31-13-37-22.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">example:
+<ul dir="auto">
+<li dir="auto">we want z-scores for undergrad and grad students</li>
+<li dir="auto"><img src="assets/2024-01-31-13-42-56.png" alt="" data-src="assets/2024-01-31-13-42-56.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Scalar Subqueries</strong>
+<ul dir="auto">
+<li dir="auto">we use this when we want to compare values to some scalar that haven't been computed yet</li>
+<li dir="auto">don't need to give it a name since it's just a scalar</li>
+<li dir="auto">can sometimes replace derived table subqueries
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-31-16-10-03.png" alt="" data-src="assets/2024-01-31-16-10-03.png"></li>
+<li dir="auto">messy but sometimes easier</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Corelated Subqueries</strong>
+<ul dir="auto">
+<li dir="auto">a subquery that uses names and aliases <em>external</em> from the subquery
+<ul dir="auto">
+<li dir="auto"><em>exxtremely inefficient</em></li>
+<li dir="auto"><em>never write this</em></li>
+<li dir="auto">subquery is <em>fully</em> executed once for every single row</li>
+<li dir="auto"><img src="assets/2024-01-31-19-18-56.png" alt="" data-src="assets/2024-01-31-19-18-56.png"></li>
+<li dir="auto">use a JOIN instead
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-31-19-20-10.png" alt="" data-src="assets/2024-01-31-19-20-10.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">Subqueries for Filtering using IN
+<ul dir="auto">
+<li dir="auto">example:
+<ul dir="auto">
+<li dir="auto">identify all aircrafts that were once operated by Airtrans</li>
+<li dir="auto"><img src="assets/2024-01-31-16-14-02.png" alt="" data-src="assets/2024-01-31-16-14-02.png"></li>
+<li dir="auto">we are only using flights.* for this to be a proper theoretical semi-join
+<ul dir="auto">
+<li dir="auto">must project all columns in a semi-join</li>
+<li dir="auto">can select less and still work in SQL</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">NOT IN implements antijoins</li>
+</ul>
+</li>
+<li dir="auto">if exam question involves HAVING, do not use subqueries to avoid it</li>
+<li dir="auto">Common Table Expressions (CTEs) are temporary virtual tables that have function similar to subqueries
+<ul dir="auto">
+<li dir="auto">more performant in recursive use cases</li>
+<li dir="auto">WITH keyword</li>
+</ul>
+</li>
+<li dir="auto">Performance of Subqueries vs Joins
+<ul dir="auto">
+<li dir="auto">nowadays the performance is about the same</li>
+<li dir="auto">except in big data systems like Hive
+<ul dir="auto">
+<li dir="auto">executes subqueries in parallel</li>
+</ul>
+</li>
+<li dir="auto">joins can be very expensive on large tables
+<ul dir="auto">
+<li dir="auto">typically want to filter as much as possible before joining
+<ul dir="auto">
+<li dir="auto">filtering usually takes place in the ON clause w/in a join (or in a subquery)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="modifying-data">Modifying Data</h3>
+<ul dir="auto">
+<li dir="auto"><strong>Adding New Rows</strong>
+<ul dir="auto">
+<li dir="auto">INSERT INTO keywords</li>
+<li dir="auto">
+<pre><code class="code-line language-SQL" dir="auto"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> relation <span class="hljs-keyword">VALUES</span>
+  (<span class="hljs-string">&#x27;val11&#x27;</span>,..., <span class="hljs-string">&#x27;val1n&#x27;</span>),
+  (<span class="hljs-string">&#x27;val21&#x27;</span>, <span class="hljs-string">&#x27;val22&#x27;</span>,..., <span class="hljs-string">&#x27;val2n&#x27;</span>)...;
+</code></pre>
+<ul dir="auto">
+<li dir="auto">strings must be in single quotes</li>
+<li dir="auto">order must match with schema cols</li>
+<li dir="auto"><em>all cols, even if default or nullable, must be specified</em></li>
+</ul>
+</li>
+<li dir="auto">but if we only want to insert some of the values in new row (using defaults for the rest)
+<ul dir="auto">
+<li dir="auto">
+<pre><code class="code-line language-SQL" dir="auto"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> relation (col1name, ..., colnname) <span class="hljs-keyword">VALUES</span>
+  (<span class="hljs-string">&#x27;val11&#x27;</span>, ..., <span class="hljs-string">&#x27;val1n&#x27;</span>),
+  (<span class="hljs-string">&#x27;val21&#x27;</span>, ..., <span class="hljs-string">&#x27;val2n&#x27;</span>)...;
+</code></pre>
+</li>
+<li dir="auto">must specify all colnames you want to specify values for</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Modifying Rows</strong>
+<ul dir="auto">
+<li dir="auto">UPDATE keyword</li>
+<li dir="auto">
+<pre><code class="code-line language-SQL" dir="auto"><span class="hljs-keyword">UPDATE</span> relation
+<span class="hljs-keyword">SET</span> <span class="hljs-keyword">column</span> <span class="hljs-operator">=</span> new_value
+<span class="hljs-keyword">WHERE</span> some_predicate;
+</code></pre>
+</li>
+<li dir="auto">example:
+<ul dir="auto">
+<li dir="auto">want to linearly scale midterm scores such that the max becomes 100</li>
+<li dir="auto">
+<pre><code class="code-line language-SQL" dir="auto"><span class="hljs-keyword">UPDATE</span> midterm
+<span class="hljs-keyword">SET</span> score <span class="hljs-operator">=</span> score <span class="hljs-operator">+</span> (
+  <span class="hljs-keyword">SELECT</span> <span class="hljs-number">100</span> <span class="hljs-operator">-</span> <span class="hljs-built_in">MAX</span>(score)
+  <span class="hljs-keyword">FROM</span> midterm
+);
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="data-integrity-constraints-and-triggers">Data Integrity Constraints and Triggers</h3>
+<ul dir="auto">
+<li dir="auto">we have already discussed several constraints on tables:
+<ul dir="auto">
+<li dir="auto">data types and their domains</li>
+<li dir="auto">NOT NULL</li>
+<li dir="auto">primary key constraints (UNIQUE and NOT NULL)</li>
+<li dir="auto">foreign keys and referntial integrity constraints</li>
+</ul>
+</li>
+<li dir="auto">CHECK clause
+<ul dir="auto">
+<li dir="auto">used to impose arbitrary constraints on a table</li>
+<li dir="auto">uses boolean expressions at bottom of table creation</li>
+<li dir="auto">e.g.
+<ul dir="auto">
+<li dir="auto"><code>CONSTRAINT Valid_Enrolldate CHECK (enrolldate &gt; birthdate)</code></li>
+<li dir="auto">throws an error if violated</li>
+</ul>
+</li>
+<li dir="auto">can only be used <em>per row</em></li>
+</ul>
+</li>
+<li dir="auto"><strong>Triggers</strong>
+<ul dir="auto">
+<li dir="auto">ON DELETE and ON UPDATE
+<ul dir="auto">
+<li dir="auto">specified <em>on the FK</em>, not PK</li>
+</ul>
+</li>
+<li dir="auto">what should happen if a city decides to close a bikeshare station
+<ul dir="auto">
+<li dir="auto">or change the ID of one of the stations?</li>
+</ul>
+</li>
+<li dir="auto"><em>best practice</em> is to not delete or update values of primary keys if it is the only source of the data (for historical reasons)
+<ul dir="auto">
+<li dir="auto">instead of deleting data, just stop using it</li>
+</ul>
+</li>
+<li dir="auto">several actions we can take when we try to delete or update a value in the primary key (<em>if it is used in a foreign key relationship</em>)
+<ul dir="auto">
+<li dir="auto">RESTRICT - RDBMS gives an error (this is the default)</li>
+<li dir="auto">CASCADE - changes propagates to the foreign key
+<ul dir="auto">
+<li dir="auto">ON DELETE CASCADE is a bad move</li>
+</ul>
+</li>
+<li dir="auto">SET NULL - sets value of foreign key to NULL when it is deleted/updated in the referenced table
+<ul dir="auto">
+<li dir="auto">rarely useful</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="flow-control-and-conditionals">Flow Control and Conditionals</h3>
+<ul dir="auto">
+<li dir="auto">CASE operator
+<ul dir="auto">
+<li dir="auto">similar to a switch, or if else statements</li>
+<li dir="auto"><img src="assets/2024-01-31-20-19-28.png" alt="" data-src="assets/2024-01-31-20-19-28.png"></li>
+<li dir="auto">alias is REQUIRED</li>
+<li dir="auto">searched case statement
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-31-20-21-58.png" alt="" data-src="assets/2024-01-31-20-21-58.png"></li>
+<li dir="auto"><em>based on insertion order</em></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">NULLIF(arg1, arg2) construct
+<ul dir="auto">
+<li dir="auto">returns NULL on invalid data, based on an equality</li>
+<li dir="auto">if arg1 is NULL, replace it with arg2</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="philosophies-for-dev-with-databases">Philosophies for Dev with Databases</h3>
+<ol dir="auto">
+<li dir="auto">handle most validation and constraint logic in app; database stores and joins data</li>
+<li dir="auto">let database handle most of the logic</li>
+</ol>
+<ul dir="auto">
+<li dir="auto">best practice is to do a bit of both</li>
+<li dir="auto">example:
+<ul dir="auto">
+<li dir="auto">enrollment in classes requires a lot of info stored in some tables
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-31-16-20-45.png" alt="" data-src="assets/2024-01-31-16-20-45.png"></li>
+<li dir="auto">two ways to check the logic
+<ul dir="auto">
+<li dir="auto">backend of app
+<ul dir="auto">
+<li dir="auto">pros/cons</li>
+<li dir="auto"><img src="assets/2024-01-31-16-23-04.png" alt="" data-src="assets/2024-01-31-16-23-04.png"></li>
+</ul>
+</li>
+<li dir="auto">the database, via TRIGGER, FUNCTION, or stored procedure (which is a fn stored in the schema)
+<ul dir="auto">
+<li dir="auto">pros/cons</li>
+<li dir="auto"><img src="assets/2024-01-31-16-23-35.png" alt="" data-src="assets/2024-01-31-16-23-35.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">naive: what if we just use JOINs to validate all the constraints?
+<ul dir="auto">
+<li dir="auto">since JOINS dominate execution time, DB will bog down on every student, every transaction</li>
+<li dir="auto">so system may go down</li>
+<li dir="auto">workarounds:
+<ul dir="auto">
+<li dir="auto">could subset the data by population to students that should be enroling</li>
+<li dir="auto">cache: can also precompute these joins (much more efficient!)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>rule of thumb</strong>
+<ul dir="auto">
+<li dir="auto"><em>business logic</em> should be encoded in app</li>
+<li dir="auto"><em>data integrity mechanisms</em> should be left to the database
+<ul dir="auto">
+<li dir="auto">e.g. primary key, foreign key, data domains, etc</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</body>
+</html>

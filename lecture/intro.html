@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/default.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markdown-it-texmath/css/texmath.min.css">
+<link rel="stylesheet" href="file:////Users/samuellu/.vscode/extensions/goessner.mdmath-2.7.4/themes/default/style.css">
+
+</head>
+<body class="markdown-body">
+<h3 dir="auto" id="flat-files">Flat Files</h3>
+<ul dir="auto">
+<li dir="auto">problems:
+<ul dir="auto">
+<li dir="auto">data integrity and redundancy
+<ul dir="auto">
+<li dir="auto">difficult to enforce constraints on data</li>
+</ul>
+</li>
+<li dir="auto">sysadmin is a bottleneck</li>
+<li dir="auto">lack of atomicity</li>
+<li dir="auto">concurrent access</li>
+<li dir="auto">security</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="databases">Databases</h3>
+<ul dir="auto">
+<li dir="auto"><strong>RDBMS</strong> - Relational DataBase Management System</li>
+<li dir="auto">purpose of database:
+<ul dir="auto">
+<li dir="auto">abstracts away how data is stored, maintained, and processed
+<ul dir="auto">
+<li dir="auto">view, add, update, and delete data w/o data integrity</li>
+</ul>
+</li>
+<li dir="auto">a system that stores/indexes data through advanced data structures</li>
+<li dir="auto">provides ONE single location for all data (although the data may be physically distributed over multiple nodes)</li>
+</ul>
+</li>
+<li dir="auto"><em>centralized database</em> - admin has al the power</li>
+<li dir="auto"><em>blockchain</em> - all nodes in system cooperate to make sure database is consistent (helps w/ security)</li>
+<li dir="auto">Git and blockchain both use merkle chains as underlying data structure</li>
+<li dir="auto"><strong>Levels of Abstraction</strong>
+<ul dir="auto">
+<li dir="auto"><em>Physical</em>
+<ul dir="auto">
+<li dir="auto">how data is stored on the disk and accessed</li>
+<li dir="auto">e.g. MySQL has 9 storage engines, while PostgreSQL has only 1</li>
+</ul>
+</li>
+<li dir="auto"><em>Logical</em>
+<ul dir="auto">
+<li dir="auto">what data is stored, how it is represented, and what relationships exist between them</li>
+<li dir="auto">essentially how to use database</li>
+</ul>
+</li>
+<li dir="auto"><em>View</em>
+<ul dir="auto">
+<li dir="auto">highest level of abstraciton and refers to specific use cases</li>
+<li dir="auto">e.g. the result of a complex SQL query for a specific problem</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><em>schema</em> - the overall design of a database</li>
+</ul>
+<h3 dir="auto" id="data-models">Data Models</h3>
+<ul dir="auto">
+<li dir="auto">define how we design databases or interact with data
+<ul dir="auto">
+<li dir="auto"><em>implementation</em> - database built with a specific model from the ground up and cannot be reconfigured to do anything else</li>
+<li dir="auto"><em>design mechanism</em> - the way to describe/visualize database</li>
+<li dir="auto">there are 8 major types</li>
+</ul>
+</li>
+</ul>
+<ol dir="auto">
+<li dir="auto"><strong>Relational Model</strong>
+<ul dir="auto">
+<li dir="auto">data stored as a <em>relation</em></li>
+<li dir="auto">rows are individual units called <em>tuples</em></li>
+<li dir="auto">columns are <em>attributes</em> common to all records
+<ul dir="auto">
+<li dir="auto">attributes have types</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Entity-Relationship (ER)</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-01-10-16-31-21.png" alt="" data-src="assets/2024-01-10-16-31-21.png"></li>
+<li dir="auto">uses a collection of objects called <em>entities</em> and relationships among them</li>
+<li dir="auto">not a database implementation, but rather used for database design</li>
+<li dir="auto">good for visualization but can get cluttered if model is big</li>
+</ul>
+</li>
+<li dir="auto"><strong>Objecte-Oriented</strong>
+<ul dir="auto">
+<li dir="auto">originally for implementation, now a design mech</li>
+<li dir="auto">data treated as instances of classes</li>
+<li dir="auto">ORM</li>
+<li dir="auto">more rare</li>
+</ul>
+</li>
+<li dir="auto"><strong>Document (Semi-Structured)</strong>
+<ul dir="auto">
+<li dir="auto">individual data objects may have different sets of attributes
+<ul dir="auto">
+<li dir="auto">records may not share core set of attributes</li>
+</ul>
+</li>
+<li dir="auto">e.g. JSON and XML</li>
+<li dir="auto">most are like NoSQL</li>
+</ul>
+</li>
+<li dir="auto"><strong>Network/Hierarchical/Graph</strong>
+<ul dir="auto">
+<li dir="auto">predates all other models</li>
+<li dir="auto">defines data records as nodes, and relationships between them as edges</li>
+<li dir="auto">a notable NoSQL examples is neo4j</li>
+</ul>
+</li>
+<li dir="auto"><strong>Vector Database</strong>
+<ul dir="auto">
+<li dir="auto">stores fixed-length numerical vectors</li>
+<li dir="auto">each vector or group of vectors may have associated metadata</li>
+<li dir="auto">indexed by metadata or <em>nearest neighbor</em> properties</li>
+<li dir="auto">allows for fast retrieval of vectors that are nearby to each other</li>
+<li dir="auto">con: not very human-readable</li>
+</ul>
+</li>
+<li dir="auto"><strong>Key-Value</strong>
+<ul dir="auto">
+<li dir="auto">lookup is very fast</li>
+<li dir="auto">data typically resides in RAM, not disk</li>
+<li dir="auto">difference from document is that there is no structure</li>
+</ul>
+</li>
+<li dir="auto"><strong>Hybrids / Multi-Models</strong></li>
+</ol>
+<h3 dir="auto" id="database-languages">Database Languages</h3>
+<ul dir="auto">
+<li dir="auto">two main semantic systems for working with databases
+<ul dir="auto">
+<li dir="auto">data definition language (DDL)
+<ul dir="auto">
+<li dir="auto">specifies a schema
+<ul dir="auto">
+<li dir="auto">collection of attribute names and data types</li>
+<li dir="auto">consistency contraints
+<ul dir="auto">
+<li dir="auto">domain constraints - data type constraints
+<ul dir="auto">
+<li dir="auto">tinyints, enums</li>
+</ul>
+</li>
+<li dir="auto">referential integrity - foreign/primary key consistency</li>
+<li dir="auto">assertions - business rules / policies coded into database</li>
+<li dir="auto">authorization - who can do what</li>
+</ul>
+</li>
+<li dir="auto">storage structure and access methods (optional)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">data manipulation language (DML)
+<ul dir="auto">
+<li dir="auto"><em>procedural</em> - user specifies what data is needed and <strong>how</strong> to get it</li>
+<li dir="auto"><em>declarative</em> - user specifies what data is need but NOT how to get it (system figures it out)</li>
+<li dir="auto">SQL is declarative
+<ul dir="auto">
+<li dir="auto">since SQL is not procedural, it is not good at sequential compuatations, or any computation where the user specifies how to perform computation</li>
+<li dir="auto"><strong>ETL</strong> - used when SQL is not enough
+<ul dir="auto">
+<li dir="auto">Extract data from database using a database connection driver</li>
+<li dir="auto">Transform the data (parse, reformat, aggregate, etc)</li>
+<li dir="auto">Load data into new table using same driver</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>query</strong> - an expression to retrieve or manipulate data</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="data-storage-and-querying">Data Storage and Querying</h3>
+<ul dir="auto">
+<li dir="auto">databases have a <em>storage manager</em> that allows us to not worry about how underlying data is laid out
+<ul dir="auto">
+<li dir="auto">most of data cannot fit into RAM, so it must be read efficiently from the disk (enabled by virtual memory)</li>
+</ul>
+</li>
+<li dir="auto">hashtable, BST, tries enable fast lookup</li>
+<li dir="auto"><em>query manager</em> - the DML (i.e. SQL) statements organized into a query plan that consists of low-level instructions that the query evaluation engine understands to perform some operation on the data</li>
+</ul>
+
+</body>
+</html>

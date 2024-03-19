@@ -14,7 +14,7 @@
     - view, add, update, and delete data w/o data integrity
   - a system that stores/indexes data through advanced data structures
   - provides ONE single location for all data (although the data may be physically distributed over multiple nodes)
-- *centralized database* - admin has al the power
+- *centralized database* - admin has all the power
 - *blockchain* - all nodes in system cooperate to make sure database is consistent (helps w/ security)
 - Git and blockchain both use merkle chains as underlying data structure
 - **Levels of Abstraction**

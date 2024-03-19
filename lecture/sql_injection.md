@@ -1,0 +1,70 @@
+### Accessing Databases from Applications
+- SWEs rarely interact directly with the database
+- typically we write software that interact with the database on our behalf
+- **Connecting and Using Database**
+  - ![](assets/2024-01-31-16-31-29.png)
+    - cursor is stateful
+- **Fetching Records via a Cursor**
+  - *curcor* - provides trraversal over a result set
+  - SQL standard provides two methods
+    - fetchone() - fetches one row
+    - fetchall() - fetches all rows
+    - others exist in different SQL clients
+  - some problems with using cursors to maintain state
+    - cursors keep database connection open, which wastes server resources
+    - cursors keep the database in a transaction (again wasting resources)
+    - thus auto-vacuum locks, and Postgress cannot garbage collection
+      - leads to table bloat and poor performance
+- **Constructing SQL Queries**
+  - ![](assets/2024-01-31-16-33-03.png)
+    - none of the first 3 methods work
+      - allows bad actors to input data that injects SQL commands
+        - then they can destroy data
+          -  `; DROP DATABASE students`
+       -  or break privacy
+          -  `OR 1=1; --`
+             -  `1=1` shortcircuits any conditions in an WHERE statement to steal all data
+    - MUST use *prepared query*
+      - pros:
+        - faster when performing multiple queries of the same form
+          - similar to using a compiled regex
+          - like a template for a query
+        - prevents SQL injection
+      - escapes the special symbols in the input (meaning treat them like normal text)
+        - whereas actual SQL commands are special text
+        - e.g. `;`, `-`, etc are escaped
+      - other ways to prevent SQL injections:
+        - remove all SQL keywords from input
+        - escape all special characters in the input
+        - best way is to do both
+        - so these will create syntax errors instead of being injected with bad SQL
+- **Must Close Connection**
+  - can use context managers to ensure connection is closed
+    - e.g. `with` in Python
+- **Python Example**
+  - ![](assets/2024-01-31-16-54-47.png)
+    - autocommit=True will execute each query as it comes
+    - autocommit=False will cache all queries and execute in the end when you commit
+      - this is atomic - so if any queries error, the state will be rolled back
+    - `%(major_input)` indicates we are pulling from a value from a dictionary corresponding to key `major_input`
+- **Caching**
+  - often times if we are reusing data, we want to cache it (much faster)
+  - app will often request data from cache first, and only if miss then request from DB
+    - if miss then DB sends requested data to app and also to cache
+  - improve speed and lightens DB workload
+- **Logging**
+  - we want to log lots of data when building an app
+    - e.g. impressions (views), interactions (clicks), conversions, visit path thru site, etc
+  - privacy
+    - we want to maintain user privacy even when logging so much data
+    - methods:
+      - minimize number of copies of private info in logs
+      - use join key everywhere else (such as UUID)
+      - hash super private data such as SSN, credit card #
+        - hashes are vulnerable to Rainbow table attacks
+          - sol: use **salt** - a (usually randomized) string that is affixed to the data before it is hashed
+            - different for every user
+          - **pepper** - similar to salt but stored in a separate table (or even in source code)
+            - more difficult to steal than salt but not widely implemented 
+        - credit card numbers use **tokenization** - on first time use store CCN in DB and send to fintech gateway; fintech sends back a token that corresponds to the CCN and the app will use this token in future transactions
+      - have retention policies (delete data that's no longer needed)
