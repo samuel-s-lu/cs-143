@@ -1,0 +1,347 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/default.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markdown-it-texmath/css/texmath.min.css">
+<link rel="stylesheet" href="file:////Users/samuellu/.vscode/extensions/goessner.mdmath-2.7.4/themes/default/style.css">
+
+</head>
+<body class="markdown-body">
+<h3 dir="auto" id="storage-engine">Storage Engine</h3>
+<ul dir="auto">
+<li dir="auto"><strong>storage engine</strong> (or storage manager) is responsible for storing, retrieving, managing data in memory/disk
+<ul dir="auto">
+<li dir="auto">most optimize data storage for <em>rows</em></li>
+<li dir="auto">some database systems store data entirely in RAM (redis), others use both disk and memory
+<ul dir="auto">
+<li dir="auto">disk very slow</li>
+</ul>
+</li>
+<li dir="auto">tradeoffs
+<ul dir="auto">
+<li dir="auto">speed</li>
+<li dir="auto">cost</li>
+<li dir="auto">data reliability</li>
+</ul>
+</li>
+<li dir="auto">disk is either SSD OR HDD</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="data-storage-methods">Data Storage Methods</h3>
+<ul dir="auto">
+<li dir="auto"><strong>main memory / RAM</strong>
+<ul dir="auto">
+<li dir="auto">fast but expensive</li>
+<li dir="auto">fastest random access (RA)</li>
+<li dir="auto"><em>volatile</em> - lose data if powered off</li>
+</ul>
+</li>
+<li dir="auto"><strong>solid state / flash</strong>
+<ul dir="auto">
+<li dir="auto">faster than HDD</li>
+<li dir="auto">expensive (but not as much as RAM)</li>
+<li dir="auto">fast RA</li>
+<li dir="auto">nonvolatile</li>
+</ul>
+</li>
+<li dir="auto"><strong>magnetic disks / HDD</strong>
+<ul dir="auto">
+<li dir="auto">very cheap but very slow</li>
+<li dir="auto">nasty failures</li>
+</ul>
+</li>
+<li dir="auto"><strong>optical media / CD / DVD / floppies</strong>
+<ul dir="auto">
+<li dir="auto">very slow</li>
+</ul>
+</li>
+<li dir="auto"><strong>tape storage</strong>
+<ul dir="auto">
+<li dir="auto">snail slow</li>
+<li dir="auto">dirt cheap</li>
+<li dir="auto">only sequential access</li>
+<li dir="auto">very stable</li>
+</ul>
+</li>
+<li dir="auto"><strong>cloud storage</strong>
+<ul dir="auto">
+<li dir="auto">variable</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="hard-disks-hdd">Hard Disks (HDD)</h3>
+<ul dir="auto">
+<li dir="auto"><strong>anatomy</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-03-12-17-46-35.png" alt="" data-src="assets/2024-03-12-17-46-35.png">
+<ul dir="auto">
+<li dir="auto">heads float above disks
+<ul dir="auto">
+<li dir="auto">if they touch (called a <em>head crash</em>) it can scratch the disk</li>
+</ul>
+</li>
+<li dir="auto">if HDD fails you can recover the data physically (can't do this with SSD)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>performance</strong>
+<ul dir="auto">
+<li dir="auto">many metrics</li>
+<li dir="auto"><em>access time</em> - time from r/w request to the time transfer starts</li>
+<li dir="auto"><em>seek time</em> - time from head to move from parked stage to a particular sector</li>
+<li dir="auto"><em>rotational latency</em> - time it takes to find a sector (assuming head is already on a track)</li>
+<li dir="auto"><em>data transfer rate</em> - time to transfer a sector to RAM
+<ul dir="auto">
+<li dir="auto">depends on the interface, e.g. SATA</li>
+</ul>
+</li>
+<li dir="auto"><em>MTBF</em> - mean time between failures</li>
+</ul>
+</li>
+<li dir="auto"><strong>hard disk organization</strong>
+<ul dir="auto">
+<li dir="auto">data on disk addressable by <strong>blocks</strong>
+<ul dir="auto">
+<li dir="auto">not bits or bytes</li>
+</ul>
+</li>
+<li dir="auto">goal: minimize block transfers between disk and RAM</li>
+</ul>
+</li>
+<li dir="auto"><strong>data access</strong>
+<ul dir="auto">
+<li dir="auto"><em>sequential</em> - access blocks in a predetermined order, usually contiguously
+<ul dir="auto">
+<li dir="auto">HDD good at this</li>
+</ul>
+</li>
+<li dir="auto"><em>random access</em> - target blocks are distributed all over disk and not in a particular order
+<ul dir="auto">
+<li dir="auto">SSD good at this</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>techniques to avoid data swapping (between RAM and disk)</strong>
+<ul dir="auto">
+<li dir="auto"><em>caching / buffering</em> - read blocks into a buffer; evict when full
+<ul dir="auto">
+<li dir="auto">databases use the MRU (most recently used) eviction policy</li>
+</ul>
+</li>
+<li dir="auto"><em>read-ahead</em> - a request for <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">b_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> also fetches <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05724em;">j</span></span></span></span> the contiguous blocks after it (in case we need it soon)</li>
+<li dir="auto"><em>scheduling</em> - group r/w requests by cylinder</li>
+<li dir="auto"><em>file organization</em> - how records/blocks are stored in disk
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-03-13-18-07-39.png" alt="" data-src="assets/2024-03-13-18-07-39.png">
+<ul dir="auto">
+<li dir="auto">NULL bitmap tells you which records are NULL</li>
+</ul>
+</li>
+<li dir="auto">DB maps reocrds into blocks, into files</li>
+<li dir="auto">1+ records fit in a block</li>
+<li dir="auto">1+ blocks form a file</li>
+<li dir="auto"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mi>e</mi><mi>c</mi><mi>o</mi><mi>r</mi><mi>d</mi><mi>s</mi><mo>⊆</mo><mi>b</mi><mi>l</mi><mi>o</mi><mi>c</mi><mi>k</mi><mi>s</mi><mo>⊆</mo><mi>f</mi><mi>i</mi><mi>l</mi><mi>e</mi><mi>s</mi><mo>⊆</mo><mi>r</mi><mi>e</mi><mi>l</mi><mi>a</mi><mi>t</mi><mi>i</mi><mi>o</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">records\subseteq blocks\subseteq files\subseteq relation</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8304em;vertical-align:-0.136em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">recor</span><span class="mord mathnormal">d</span><span class="mord mathnormal">s</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">⊆</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8304em;vertical-align:-0.136em;"></span><span class="mord mathnormal">b</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">oc</span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mord mathnormal">s</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">⊆</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mord mathnormal">i</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">es</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">⊆</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">re</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">a</span><span class="mord mathnormal">t</span><span class="mord mathnormal">i</span><span class="mord mathnormal">o</span><span class="mord mathnormal">n</span></span></span></span></li>
+<li dir="auto">records in distinct tables will have different sizes
+<ul dir="auto">
+<li dir="auto">two ways to store records into files
+<ul dir="auto">
+<li dir="auto">assume all records are the same length
+<ul dir="auto">
+<li dir="auto">easy to find the <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span>-th records</li>
+<li dir="auto">two problems:
+<ul dir="auto">
+<li dir="auto">what if block size is not a multiple of record size?
+<ul dir="auto">
+<li dir="auto">we'd have to use a new block and waste some space</li>
+</ul>
+</li>
+<li dir="auto">what happens when we delete records?
+<ul dir="auto">
+<li dir="auto">records ordered in linked list so first change pointers</li>
+<li dir="auto">keep track of an empty_record linked list so you know where you can fill in</li>
+</ul>
+</li>
+<li dir="auto">if the block where you need to insert record (for preservation of sequence) is full, put record in overflow block
+<ul dir="auto">
+<li dir="auto">from time to time reorder records so they are again sequential</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">allow records to differ in length (<strong>slotted page</strong>)
+<ul dir="auto">
+<li dir="auto">create a table of records that points to variable-sized attributes
+<ul dir="auto">
+<li dir="auto">each entry is the form of (offset, length)</li>
+</ul>
+</li>
+<li dir="auto">followed by the data for fixed-size attributes, the null bitmap, then finally data for variable-sized attributes</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-03-13-17-53-24.png" alt="" data-src="assets/2024-03-13-17-53-24.png"></li>
+</ul>
+</li>
+<li dir="auto"><em>organizing orecords into blocks</em>
+<ul dir="auto">
+<li dir="auto">each block has a header that contains:
+<ul dir="auto">
+<li dir="auto">num records in the block</li>
+<li dir="auto">location of end of free space in block</li>
+<li dir="auto">location and size of each record</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-03-13-17-58-07.png" alt="" data-src="assets/2024-03-13-17-58-07.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><em>non-volatile write buffers</em>
+<ul dir="auto">
+<li dir="auto">if there are lots of writes, we might have to wait before we can write the block to disk</li>
+<li dir="auto">queue it in non-volatile RAM (NVRAM) while waiting
+<ul dir="auto">
+<li dir="auto">if power outage occurs, the queue can still persist for a little and be written to disk successfully</li>
+</ul>
+</li>
+<li dir="auto">if NVRAM fills up the DB will block</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="indexing">Indexing</h3>
+<ul dir="auto">
+<li dir="auto">a full table scan is slow, must do better</li>
+<li dir="auto"><img src="assets/2024-03-13-18-15-28.png" alt="" data-src="assets/2024-03-13-18-15-28.png"></li>
+<li dir="auto"><strong>index</strong> - enables fast lookups
+<ul dir="auto">
+<li dir="auto">given a search key, an index gives you the block addresses + offsets of relevant records
+<ul dir="auto">
+<li dir="auto">search key can be anything (not necessarily PK, CK, etc)</li>
+</ul>
+</li>
+<li dir="auto">if index fits in RAM we must read it into RAM first</li>
+</ul>
+</li>
+<li dir="auto">metrics for indices
+<ul dir="auto">
+<li dir="auto">access time - equality or range search?</li>
+<li dir="auto">access/search time</li>
+<li dir="auto">insertion time</li>
+<li dir="auto">deletion time</li>
+<li dir="auto">space overhead</li>
+</ul>
+</li>
+<li dir="auto"><strong>Ordered indices</strong> - based on a sorted ordering of the sort-key values
+<ul dir="auto">
+<li dir="auto"><em>ISAM</em> - Index Sequential Access Method
+<ul dir="auto">
+<li dir="auto">was revolution and very simple to implement
+<ul dir="auto">
+<li dir="auto">but has limitations that have caused its deprecation</li>
+</ul>
+</li>
+<li dir="auto">good at first when data is stored contiguously
+<ul dir="auto">
+<li dir="auto">but over time there may be many overflow blocks which slows things down</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><em>primary (clustering) vs secondary (non-clustering)</em>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-03-13-18-26-46.png" alt="" data-src="assets/2024-03-13-18-26-46.png">
+<ul dir="auto">
+<li dir="auto">primary index usually associated with PK</li>
+<li dir="auto">pretty fast</li>
+<li dir="auto">if there are multiple records with the search key, index only points to the first one
+<ul dir="auto">
+<li dir="auto">then search data sequentially to find all of the matching records</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-03-13-18-36-40.png" alt="" data-src="assets/2024-03-13-18-36-40.png"></li>
+<li dir="auto"><em>secondary</em> - data file is sorted by some search key different from the one used to create the index
+<ul dir="auto">
+<li dir="auto">the index has a linked list for each search key
+<ul dir="auto">
+<li dir="auto">linked list contains pointers to all duplicate values of the search key in the data</li>
+</ul>
+</li>
+<li dir="auto">can only be dense! since data file not sorted by the search key</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><em>dense vs sparse</em>
+<ul dir="auto">
+<li dir="auto"><em>dense</em> - every value of the search key in the records is in the index</li>
+<li dir="auto"><em>sparse</em> - only some of the possible key values in the records in is the index
+<ul dir="auto">
+<li dir="auto">follow the greatest index that is smaller than the search key than scan downward until target is found</li>
+<li dir="auto">pro: can more likely read index into RAM</li>
+<li dir="auto">con: more block transfers when searching for target block</li>
+<li dir="auto">how to pick the keys that appear in the sparse index?
+<ul dir="auto">
+<li dir="auto">goal: minimize block transfers</li>
+<li dir="auto">so pick first search-key in each block</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>B+ Tree</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-03-13-18-54-10.png" alt="" data-src="assets/2024-03-13-18-54-10.png"></li>
+<li dir="auto"><img src="assets/2024-03-13-18-57-22.png" alt="" data-src="assets/2024-03-13-18-57-22.png">
+<ul dir="auto">
+<li dir="auto">only stores index, NO DATA</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-03-13-19-01-28.png" alt="" data-src="assets/2024-03-13-19-01-28.png">
+<ul dir="auto">
+<li dir="auto">order of insertion matters for what tree looks like</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-03-13-19-15-18.png" alt="" data-src="assets/2024-03-13-19-15-18.png"></li>
+<li dir="auto">traversal times, given <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mi>S</mi></msub></mrow><annotation encoding="application/x-tex">t_S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05764em;">S</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> seek time and <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mi>T</mi></msub></mrow><annotation encoding="application/x-tex">t_T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> transfer time
+<ul dir="auto">
+<li dir="auto">traversing a level: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mi>S</mi></msub><mo>+</mo><msub><mi>t</mi><mi>T</mi></msub></mrow><annotation encoding="application/x-tex">t_S+t_T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05764em;">S</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></li>
+<li dir="auto">traversing one leaf node to the next: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mi>T</mi></msub></mrow><annotation encoding="application/x-tex">t_T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> (for primary)</li>
+<li dir="auto">fetching a record <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mi>S</mi></msub><mo>+</mo><msub><mi>t</mi><mi>T</mi></msub></mrow><annotation encoding="application/x-tex">t_S+t_T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05764em;">S</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></li>
+</ul>
+</li>
+<li dir="auto">search time: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo stretchy="false">(</mo><msub><mi>t</mi><mi>S</mi></msub><mo>+</mo><msub><mi>t</mi><mi>T</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">h(t_S+t_T)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">h</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05764em;">S</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></li>
+<li dir="auto">inserts/deletions complexity is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msub><mrow><mi>log</mi><mo>⁡</mo></mrow><mrow><mi>c</mi><mi>e</mi><mi>i</mi><mi>l</mi><mo stretchy="false">(</mo><mi>n</mi><mi mathvariant="normal">/</mi><mn>2</mn><mo stretchy="false">)</mo></mrow></msub><mi>H</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log_{ceil(n/2)}{H})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.1691em;vertical-align:-0.4191em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop"><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2809em;"><span style="top:-2.4559em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">ce</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight">n</span><span class="mord mtight">/2</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4191em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.08125em;">H</span></span><span class="mclose">)</span></span></span></span></li>
+<li dir="auto"><img src="assets/2024-03-14-21-03-48.png" alt="" data-src="assets/2024-03-14-21-03-48.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Hash indices</strong> - based on a uniform distribution of values across a range of buckets
+<ul dir="auto">
+<li dir="auto">random access (similar to hash table)</li>
+<li dir="auto">great at answering equality queries, but no so much at answering rnage queries
+<ul dir="auto">
+<li dir="auto">since keys are not stored in a consistent order</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-03-14-21-06-36.png" alt="" data-src="assets/2024-03-14-21-06-36.png">xzx</li>
+</ul>
+</li>
+</ul>
+
+</body>
+</html>

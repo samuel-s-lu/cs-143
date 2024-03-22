@@ -1,0 +1,284 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/default.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markdown-it-texmath/css/texmath.min.css">
+<link rel="stylesheet" href="file:////Users/samuellu/.vscode/extensions/goessner.mdmath-2.7.4/themes/default/style.css">
+
+</head>
+<body class="markdown-body">
+<h3 dir="auto" id="distributed-systems">Distributed Systems</h3>
+<ul dir="auto">
+<li dir="auto">two main data system architectures:</li>
+<li dir="auto">
+<ol dir="auto">
+<li dir="auto"><strong>replication</strong> - all nodes have exactly the same data</li>
+</ol>
+<ul dir="auto">
+<li dir="auto">pros:
+<ul dir="auto">
+<li dir="auto">load balance</li>
+<li dir="auto">fault tolerace =&gt; high availability, mostly consistent
+<ul dir="auto">
+<li dir="auto">consistent means you always get the correct answer, or gets no answer (if correct one not avail)</li>
+<li dir="auto">availability means even if a system goes down you'll still get the answer from somewhere, but it might be outdated or incorrect</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">
+<ol start="2" dir="auto">
+<li dir="auto"><strong>sharding</strong> - different nodes contain different data</li>
+</ol>
+<ul dir="auto">
+<li dir="auto">pros:
+<ul dir="auto">
+<li dir="auto">low latency</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="big-data">Big Data</h3>
+<ul dir="auto">
+<li dir="auto">purpose a big data system is to maximize the usage compute resources to increase the amount of work we can do per unit time
+<ul dir="auto">
+<li dir="auto">big datasets do not fit in RAM on a single machine and require parallelism</li>
+</ul>
+</li>
+<li dir="auto"><em>parallelism does not make data processing faster, but increases throughput</em>
+<ul dir="auto">
+<li dir="auto">can get a result quicker</li>
+<li dir="auto">in some cases parallism can make processing slower due to overhead</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="hadoop-ecosystem">Hadoop Ecosystem</h3>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-22-27-13.png" alt="" data-src="assets/2024-02-24-22-27-13.png"></li>
+<li dir="auto"><strong>Hadoop Distributed File System (HDFS) Infrastructure</strong></li>
+<li dir="auto"><img src="assets/2024-02-24-22-28-52.png" alt="" data-src="assets/2024-02-24-22-28-52.png"></li>
+</ul>
+<h3 dir="auto" id="mapreduce">MapReduce</h3>
+<ul dir="auto">
+<li dir="auto">7 dataflow phases</li>
+<li dir="auto">example: count word frequencies in english novels</li>
+<li dir="auto"><strong>Input</strong>
+<ul dir="auto">
+<li dir="auto"><em>InputFormat</em> is the implementation of the input phase</li>
+<li dir="auto">specifies:
+<ul dir="auto">
+<li dir="auto">how records are laid out in files</li>
+<li dir="auto">how to divide groups of records into <strong>splits</strong>
+<ul dir="auto">
+<li dir="auto">splits are used to define parallelism and typically contain 1 block of data</li>
+<li dir="auto">each split defines a map task</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-02-24-22-36-27.png" alt="" data-src="assets/2024-02-24-22-36-27.png"></li>
+</ul>
+</li>
+<li dir="auto"><strong>Map</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-22-37-42.png" alt="" data-src="assets/2024-02-24-22-37-42.png"></li>
+<li dir="auto"><img src="assets/2024-02-24-22-39-29.png" alt="" data-src="assets/2024-02-24-22-39-29.png"></li>
+</ul>
+</li>
+<li dir="auto"><strong>Partition</strong>
+<ul dir="auto">
+<li dir="auto">need to group key-value pairs by key
+<ul dir="auto">
+<li dir="auto">each key-value pair is assigned to a partition using a hash function applied on key, then a modulo based on number of reduce tasks</li>
+<li dir="auto">thus all key-value pairs with same key is sent to the same reducer task in reduce phase</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-02-24-22-51-54.png" alt="" data-src="assets/2024-02-24-22-51-54.png">
+<ul dir="auto">
+<li dir="auto">all of this is called the <em>map side</em></li>
+</ul>
+</li>
+<li dir="auto">each partition is then shuffled across the network to reducers</li>
+</ul>
+</li>
+<li dir="auto"><strong>Shuffle</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-22-52-13.png" alt="" data-src="assets/2024-02-24-22-52-13.png"></li>
+</ul>
+</li>
+<li dir="auto"><strong>Sort</strong>
+<ul dir="auto">
+<li dir="auto">sort key-value pairs by key</li>
+<li dir="auto">values are then grouped by key:
+<ul dir="auto">
+<li dir="auto"><code>(key, [list of values])</code></li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-02-24-22-54-15.png" alt="" data-src="assets/2024-02-24-22-54-15.png"></li>
+</ul>
+</li>
+<li dir="auto"><strong>Reduce</strong>
+<ul dir="auto">
+<li dir="auto">each reducer executes a <em>reduce</em> function
+<ul dir="auto">
+<li dir="auto">in word counts example, it's the sum function</li>
+</ul>
+</li>
+<li dir="auto">note that a given reducer may act on key-value pairs that come from different mappers</li>
+</ul>
+</li>
+<li dir="auto"><strong>Output</strong>
+<ul dir="auto">
+<li dir="auto">write <code>(key, frequency sum)</code> outputs to a file</li>
+<li dir="auto">each reducer outputs a single files</li>
+<li dir="auto">can use an <strong>OutputFormat</strong> if we want to store output in another format such as delimited, Parquet, binary, etc</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="map-reduce-summary">Map Reduce Summary</h3>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-23-02-54.png" alt="" data-src="assets/2024-02-24-23-02-54.png">
+<ul dir="auto">
+<li dir="auto">shuffle moves data from map side to reduce side</li>
+</ul>
+</li>
+<li dir="auto">MapReduce functions on each input split <em>independently</em>
+<ul dir="auto">
+<li dir="auto">splits control which mapper each record goes to</li>
+<li dir="auto">k-v pair from map phase controls which reducer operates on it</li>
+</ul>
+</li>
+<li dir="auto">MapReduce is a <strong>shared-nothing</strong> model
+<ul dir="auto">
+<li dir="auto">also <em>embarrassingly/pleasingly parallel</em></li>
+</ul>
+</li>
+<li dir="auto">MapReduce doesn't require a full big data infrastructure like Hadoop
+<ul dir="auto">
+<li dir="auto">can be implemented in functional languages such as ML or Haskell</li>
+<li dir="auto">can also combine mapper and reducer code via Unix pipe
+<ul dir="auto">
+<li dir="auto">e.g. <code>cat record1 record2 | mapper.py | sort | reducer.py</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="sql-in-mapreduce">SQL in MapReduce</h3>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-23-16-48.png" alt="" data-src="assets/2024-02-24-23-16-48.png"></li>
+<li dir="auto">SQL operations can be performed using combinations of map and reduce phases
+<ul dir="auto">
+<li dir="auto">relational algebra select (SQL WHERE):
+<ul dir="auto">
+<li dir="auto">filter rows / key-value before shuffle (map-side)</li>
+</ul>
+</li>
+<li dir="auto">aggregation <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span></span></span></span>:
+<ul dir="auto">
+<li dir="auto">GROUP BY: partition OR sort (map-side)</li>
+<li dir="auto">aggregation function: reduce!</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">SQL queries are correspond directly to MapReduce</li>
+<li dir="auto">subqueries spawn sub-MapReduce jobs, which encourage parallelism</li>
+<li dir="auto"><strong>Apache Hive</strong> - uses SQL as a &quot;relational language&quot; on top of MapReduce and HDFS
+<ul dir="auto">
+<li dir="auto">not RDBMS but sometimes used as DW</li>
+</ul>
+</li>
+<li dir="auto"><strong>Apache Pig</strong> uses a declarative language called Pig Latin for the same
+<ul dir="auto">
+<li dir="auto">more closely resembles relational algebra</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="apache-spark">Apache Spark</h3>
+<ul dir="auto">
+<li dir="auto">think of our pipeline as a series of <em>algebraic</em> steps that take as input as well as output arbitrary data</li>
+<li dir="auto">instead of relations, Spark uses <strong>Resilient Distributed Datasets (RDDs)</strong> as input and ouput to/from operators
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-23-45-33.png" alt="" data-src="assets/2024-02-24-23-45-33.png"></li>
+<li dir="auto">higher levels of abstraction than RDD exist now
+<ul dir="auto">
+<li dir="auto">but RDDs still useful when data is unstructured / schemaless</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">data in Spark is treated as a single data structure as if it's on one machine</li>
+<li dir="auto">advantages of Spark over Hadoop:
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-23-48-18.png" alt="" data-src="assets/2024-02-24-23-48-18.png"></li>
+<li dir="auto">a lot faster than Hadoop</li>
+</ul>
+</li>
+<li dir="auto"><strong>Transformations and Actions</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-23-50-21.png" alt="" data-src="assets/2024-02-24-23-50-21.png"></li>
+<li dir="auto"><img src="assets/2024-02-24-23-52-06.png" alt="" data-src="assets/2024-02-24-23-52-06.png">
+<ul dir="auto">
+<li dir="auto">actions execute the DAG</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">other advantages of Spark:
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-23-53-48.png" alt="" data-src="assets/2024-02-24-23-53-48.png"></li>
+</ul>
+</li>
+<li dir="auto">Spark core executation model
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-23-56-31.png" alt="" data-src="assets/2024-02-24-23-56-31.png"></li>
+</ul>
+</li>
+<li dir="auto">Spark word counts
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-25-00-03-19.png" alt="" data-src="assets/2024-02-25-00-03-19.png"></li>
+</ul>
+</li>
+<li dir="auto">Spark computation of <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>π</mi></mrow><annotation encoding="application/x-tex">\pi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">π</span></span></span></span>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-25-00-04-07.png" alt="" data-src="assets/2024-02-25-00-04-07.png"></li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="spark-sql">Spark SQL</h3>
+<ul dir="auto">
+<li dir="auto">Spark uses the idea of MapReduce but not the implementation
+<ul dir="auto">
+<li dir="auto">some Spark operators are built on top of Hadoop and MapReduce, but it is all abstracted away from user</li>
+</ul>
+</li>
+<li dir="auto">Spark is NOT an RDBMS
+<ul dir="auto">
+<li dir="auto">so Spark SQL is not as sophisticated as RDBMS
+<ul dir="auto">
+<li dir="auto">joins are the biggest source of poor performance in Spark</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">Spark provides a relational layer on top of data in HDFS
+<ul dir="auto">
+<li dir="auto">data in Spark SQL is represented as a DataFrame (looks like a table)</li>
+</ul>
+</li>
+<li dir="auto">example in python
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-25-00-12-20.png" alt="" data-src="assets/2024-02-25-00-12-20.png"></li>
+</ul>
+</li>
+</ul>
+
+</body>
+</html>

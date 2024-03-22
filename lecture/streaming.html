@@ -1,0 +1,285 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/default.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markdown-it-texmath/css/texmath.min.css">
+<link rel="stylesheet" href="file:////Users/samuellu/.vscode/extensions/goessner.mdmath-2.7.4/themes/default/style.css">
+
+</head>
+<body class="markdown-body">
+<h3 dir="auto" id="streaming-data-systems">Streaming Data Systems</h3>
+<ul dir="auto">
+<li dir="auto">real time</li>
+<li dir="auto">up to this point we have talked about:
+<ul dir="auto">
+<li dir="auto">RDBMS/OLTP</li>
+<li dir="auto">OLAP/Data Warehouses</li>
+<li dir="auto">Batch Processing systems (MapReduce / Spark)</li>
+<li dir="auto">these systems work on <em>complete</em> and <em>bounded</em> data
+<ul dir="auto">
+<li dir="auto">store and have access all data
+<ul dir="auto">
+<li dir="auto">thus can produce results deterministally</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">what about unbounded data?
+<ul dir="auto">
+<li dir="auto">data arrives as it is produced</li>
+<li dir="auto">dataset <em>never</em> complete</li>
+<li dir="auto">must use <strong>stream processing</strong>
+<ul dir="auto">
+<li dir="auto">must consider velocity and volume</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-03-06-19-01-53.png" alt="" data-src="assets/2024-03-06-19-01-53.png"></li>
+<li dir="auto"><strong>Lambda architecture</strong> - processes massive quantities of data by using both batch and realtime/stream processing (speed)</li>
+<li dir="auto">examples of streams:
+<ul dir="auto">
+<li dir="auto">stdin, stdout</li>
+<li dir="auto">pipes reamd streams and redirect them to other ps</li>
+<li dir="auto">TCP connections</li>
+<li dir="auto">realtime audio/video</li>
+<li dir="auto">constant sensor measurements</li>
+<li dir="auto">realtime data such as tweets, stock prices, sports info, activity in video game</li>
+</ul>
+</li>
+<li dir="auto">work with individual records, called <strong>events</strong> or <strong>messages</strong>
+<ul dir="auto">
+<li dir="auto">each event partially identified with a timestamp
+<ul dir="auto">
+<li dir="auto">written once but may be read multiple times</li>
+<li dir="auto">may have a key associated with it</li>
+</ul>
+</li>
+<li dir="auto">want to act on data as it arrives shortly after, <em>not</em> long after</li>
+<li dir="auto">don't want to store in RDBMS since the massive amount of writes may lock up db</li>
+</ul>
+</li>
+<li dir="auto">two ends / &quot;taps&quot; for processing events
+<ul dir="auto">
+<li dir="auto"><strong>producer</strong> (or pbulisher, sender) - creates an event or msg</li>
+<li dir="auto"><strong>consumer</strong> (subscriber, recipient) - receives + processes OR hands off a msg from producer</li>
+</ul>
+</li>
+<li dir="auto">can have producers publish (write) to RDBMS and have subscriber poll routinely for new data
+<ul dir="auto">
+<li dir="auto">but this is inefficient and high latency</li>
+<li dir="auto">better to use a push model than a pull model</li>
+</ul>
+</li>
+<li dir="auto">most rudimentary model is to directly connect producers and consumers (like a bipartite graph)
+<ul dir="auto">
+<li dir="auto">problems:
+<ul dir="auto">
+<li dir="auto">producers must be hardcoded to consumers</li>
+<li dir="auto">producers are all independent (if one becomes unavailable others don't know to help)</li>
+<li dir="auto">producers can transmit data faster than consumers can process</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>message broker</strong> - sits in the message bus between publishers and subscribers
+<ul dir="auto">
+<li dir="auto">communicates with both pub and sub
+<ul dir="auto">
+<li dir="auto">handles the case where pub/sub come and go
+<ul dir="auto">
+<li dir="auto">maintains state and spins up new pub/sub with minimal delay</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">publishers send msgs to brokers</li>
+<li dir="auto">subscribers read msgs from the broker</li>
+<li dir="auto">broker has a queue of messages and try to dispatch them to consumers
+<ul dir="auto">
+<li dir="auto">if consumer receives and sends back ACK, delete msg from queue
+<ul dir="auto">
+<li dir="auto">same with producer -&gt; broker</li>
+<li dir="auto">consumer does not send ACK until it finishes <em>processing</em> the msg
+<ul dir="auto">
+<li dir="auto">since something can go wrong during processing</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">two phase commit (2PC) - producer only deletes msg once the consumer sends ACK to broker, which is then forward to the producer as a special commit ACK (full round trip ACK)
+<ul dir="auto">
+<li dir="auto">this is an optional guarantee</li>
+<li dir="auto">useful when pub can't trust broker/sub</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">what if broker gets overwhelmed?
+<ul dir="auto">
+<li dir="auto">can apply flow control or spin up more consumers</li>
+<li dir="auto">if we are willing to tolerate some msg loss, we can delete the oldest msgs in queue, or at random
+<ul dir="auto">
+<li dir="auto">for former: think twitter trending topic</li>
+<li dir="auto">for latter: think computing running aggregates</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">all consumers are not necessarily made equally
+<ul dir="auto">
+<li dir="auto">how does broker determine which one gets msg?
+<ul dir="auto">
+<li dir="auto"><strong>load balancing</strong> - broker chooses one consumer to receive the msg arbitrarily o rbased on some shard</li>
+<li dir="auto"><strong>fan-out</strong> - aka broadcast; broker delivers the msg to ALL consumers in particular groups
+<ul dir="auto">
+<li dir="auto">each node may do something different with the message</li>
+<li dir="auto">similar to multiplexing (dual writes)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">sources of msg loss
+<ul dir="auto">
+<li dir="auto">loss networks</li>
+<li dir="auto">pub/sub offline</li>
+<li dir="auto">sub goes down <strong>ungracefully</strong> (no one knows it went down, e.g. power loss)</li>
+<li dir="auto">broker goes down (sol: backup brokers)</li>
+<li dir="auto">broker/pub/sub overflows with msgs</li>
+</ul>
+</li>
+<li dir="auto">there's a TTL on messages that after expiration, we no longer care about msg (can delete)</li>
+<li dir="auto"><img src="assets/2024-03-07-18-02-02.png" alt="" data-src="assets/2024-03-07-18-02-02.png"></li>
+<li dir="auto"><img src="assets/2024-03-08-11-41-50.png" alt="" data-src="assets/2024-03-08-11-41-50.png"></li>
+<li dir="auto"><img src="assets/2024-03-08-11-42-03.png" alt="" data-src="assets/2024-03-08-11-42-03.png"></li>
+<li dir="auto"><img src="assets/2024-03-08-11-42-15.png" alt="" data-src="assets/2024-03-08-11-42-15.png"></li>
+</ul>
+<h3 dir="auto" id="processing-streaming-data">Processing Streaming Data</h3>
+<ul dir="auto">
+<li dir="auto">what can we do with streams?
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-03-07-18-04-03.png" alt="" data-src="assets/2024-03-07-18-04-03.png"></li>
+</ul>
+</li>
+<li dir="auto"><strong>computing aggregates of streams</strong>
+<ul dir="auto">
+<li dir="auto">typically process data either over a particular window <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi></mrow><annotation encoding="application/x-tex">w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span></span></span> of time, or over all time</li>
+<li dir="auto">aggregates could be approximations or exact</li>
+<li dir="auto">idea: the consumers, or stream processing system, maintain a memory buffer containing a fixed number of messages
+<ul dir="auto">
+<li dir="auto">then compute aggreagtes either
+<ul dir="auto">
+<li dir="auto">over parts (windows) of the buffer</li>
+<li dir="auto">at specific time intervals over the entire buffer</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">different ways to construct computation windows
+<ul dir="auto">
+<li dir="auto"><strong>tumbling window</strong> - non-overlapping windows of time (consecutive)</li>
+<li dir="auto"><strong>hopping window</strong> - fixed length period, but time periods overlap
+<ul dir="auto">
+<li dir="auto">the better approach</li>
+<li dir="auto">gives us some continuity and eliminates hard breaks</li>
+<li dir="auto">smoother running average</li>
+</ul>
+</li>
+<li dir="auto"><strong>sliding window</strong> - constructed within some time period <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">\epsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ϵ</span></span></span></span> around each event</li>
+<li dir="auto"><strong>session window</strong> - defines an entire session from first event of a particular type, to the last event
+<ul dir="auto">
+<li dir="auto">inefficient and similar to RDBMS</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">how to handle stragglers?
+<ul dir="auto">
+<li dir="auto">i.e. data that should've been in the previous window but arrived late</li>
+<li dir="auto">we can either
+<ul dir="auto">
+<li dir="auto">ignore stragglers</li>
+<li dir="auto">keep previous window open for a while to capture stragglers</li>
+<li dir="auto">if we store metric associated with prev window, we can correct the metric later
+<ul dir="auto">
+<li dir="auto">only works with an updatable statistic
+<ul dir="auto">
+<li dir="auto">easy: count, min, max, avg, std
+<ul dir="auto">
+<li dir="auto">e.g. for avg we want to save the running sum and the count <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>
+<ul dir="auto">
+<li dir="auto">sum = sum + new</li>
+<li dir="auto">n += 1</li>
+<li dir="auto">mean = sum / n</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">hard: median, percentile</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">we can just include straggler in current window's calculations</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-03-08-11-42-50.png" alt="" data-src="assets/2024-03-08-11-42-50.png"></li>
+<li dir="auto"><strong>special aggregations and data management on streams</strong>
+<ul dir="auto">
+<li dir="auto">set containment and duplicate removal
+<ul dir="auto">
+<li dir="auto">trivial to solve with a set, but does not scale
+<ul dir="auto">
+<li dir="auto">tradesoff memory with perfect accuracy</li>
+</ul>
+</li>
+<li dir="auto"><strong>bloom filter</strong> - a probabilistic data structure that may return the wrong answer
+<ul dir="auto">
+<li dir="auto">defined as a bit string of length <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span></span></span></span> and associated with <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> hash functions</li>
+<li dir="auto"><img src="assets/2024-03-07-18-33-11.png" alt="" data-src="assets/2024-03-07-18-33-11.png"></li>
+<li dir="auto"><img src="assets/2024-03-07-18-33-28.png" alt="" data-src="assets/2024-03-07-18-33-28.png"></li>
+<li dir="auto">hash collisions can cause false positives</li>
+<li dir="auto">want low ratio of hash function to <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span></span></span></span></li>
+<li dir="auto">want to control # of entries <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> into Bloom filter</li>
+<li dir="auto">
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>F</mi><mi>P</mi><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>k</mi><mi>n</mi><mi mathvariant="normal">/</mi><mi>m</mi></mrow></msup><msup><mo stretchy="false">)</mo><mi>k</mi></msup></mrow><annotation encoding="application/x-tex">P(FP) = (1-e^{-kn/m})^k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.13889em;">FP</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.188em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.938em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mathnormal mtight">kn</span><span class="mord mtight">/</span><span class="mord mathnormal mtight">m</span></span></span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8991em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span></span></span></span></span></span></span></span></span></p>
+</math>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">count distinct
+<ul dir="auto">
+<li dir="auto"><strong>HyperLogLog</strong> - similar to Bloom Filter except we treat bitstring as a binary number
+<ul dir="auto">
+<li dir="auto">use run lenghts and probability to provide an estimate of the cardinality of a set</li>
+<li dir="auto">amazing space complexity
+<ul dir="auto">
+<li dir="auto">can count ~4 billion distinct elements using only 5 bits</li>
+</ul>
+</li>
+<li dir="auto">asymptotically, HyperLogLog has an avg error of only 2% on cardinality estimates</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</body>
+</html>

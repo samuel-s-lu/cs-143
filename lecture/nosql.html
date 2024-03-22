@@ -1,0 +1,255 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/default.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markdown-it-texmath/css/texmath.min.css">
+<link rel="stylesheet" href="file:////Users/samuellu/.vscode/extensions/goessner.mdmath-2.7.4/themes/default/style.css">
+
+</head>
+<body class="markdown-body">
+<h3 dir="auto" id="nosql-definition">NoSQL Definition</h3>
+<ul dir="auto">
+<li dir="auto">NoSQL refers to two separate concepts</li>
+<li dir="auto">
+<ol dir="auto">
+<li dir="auto">a database system where the DML and DDL is something other than SQL</li>
+</ol>
+</li>
+<li dir="auto">
+<ol start="2" dir="auto">
+<li dir="auto">a database system that does not use the <em>relational model</em>, e.g. document stores, graph db, key-value stores</li>
+</ol>
+</li>
+<li dir="auto">most NoSQL DBs are distributed
+<ul dir="auto">
+<li dir="auto">makes use of <em>replication</em> and <em>sharding</em>
+<ul dir="auto">
+<li dir="auto">usually sharded and each shard is replicated</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="cap-theorem">CAP Theorem</h3>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-03-08-14-55-20.png" alt="" data-src="assets/2024-03-08-14-55-20.png">
+<ul dir="auto">
+<li dir="auto">consistency is about up to date data
+<ul dir="auto">
+<li dir="auto">system blocks (waits) for the correct data, and if can't get it then throw error</li>
+<li dir="auto">good for DBs</li>
+<li dir="auto">but not important for apps like social media</li>
+</ul>
+</li>
+<li dir="auto">availability means you always an immediate answer
+<ul dir="auto">
+<li dir="auto">but might not be the correct answer</li>
+</ul>
+</li>
+<li dir="auto">often used inccorectly
+<ul dir="auto">
+<li dir="auto">not usually correct to say &quot;mongoDB is CP/AP&quot;
+<ul dir="auto">
+<li dir="auto">depends on config!</li>
+<li dir="auto">determined by how system behaves during a netowrk partition even (P) where parts of system cannot communicate with another
+<ul dir="auto">
+<li dir="auto">sacrifice avail or consistency?</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="nosql-data-models">NoSQL Data Models</h3>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-03-08-15-03-29.png" alt="" data-src="assets/2024-03-08-15-03-29.png"></li>
+<li dir="auto"><strong>key-value stores</strong> - a database that implements a hash table
+<ul dir="auto">
+<li dir="auto">Redis is the most popular key-value store
+<ul dir="auto">
+<li dir="auto">stands for REmote DIctionary Server</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-03-08-15-06-22.png" alt="" data-src="assets/2024-03-08-15-06-22.png"></li>
+<li dir="auto">Redis usually operates in single node config
+<ul dir="auto">
+<li dir="auto">CAP doesn't apply since not distributed</li>
+<li dir="auto">but has cluster configs (some in AP some in CP)
+<ul dir="auto">
+<li dir="auto">Redis as cache: AP</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">uses cases include:
+<ul dir="auto">
+<li dir="auto">session caching (big one)</li>
+<li dir="auto">message queues</li>
+<li dir="auto">leaderboards</li>
+<li dir="auto">fast lookup and indexing</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>columnar datastore</strong>
+<ul dir="auto">
+<li dir="auto">similar to relational model except each row can have different numbers of columns
+<ul dir="auto">
+<li dir="auto">i.e. fixed # of columns but each row may only use a subset of them</li>
+<li dir="auto">adding columns is easy</li>
+</ul>
+</li>
+<li dir="auto">popular columnar stores
+<ul dir="auto">
+<li dir="auto">DuckDB - OLAP DB</li>
+<li dir="auto">HBase - based on MapReduced
+<ul dir="auto">
+<li dir="auto">can store <em>any</em> kind of data</li>
+<li dir="auto">designed for data lakes and analytics</li>
+<li dir="auto">CP - need consistent reads/writes</li>
+</ul>
+</li>
+<li dir="auto">Cassandra - requires specific structure
+<ul dir="auto">
+<li dir="auto">designed for <em>always-on</em> operation (e.g. powering web/mobile apps)
+<ul dir="auto">
+<li dir="auto">AP</li>
+</ul>
+</li>
+<li dir="auto">every node is equal (no master/workers)
+<ul dir="auto">
+<li dir="auto"><strong>gossip protocol</strong> - every node passes messages to each other
+<ul dir="auto">
+<li dir="auto">guarantees <em>eventual consistency</em></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">each row has a key and series of columns
+<ul dir="auto">
+<li dir="auto">each column has name, value, and timestamp</li>
+<li dir="auto">set of column names fixed by schema</li>
+<li dir="auto">each row can have diff columns</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-03-08-15-27-52.png" alt="" data-src="assets/2024-03-08-15-27-52.png"></li>
+<li dir="auto">differences from RDBMS
+<ul dir="auto">
+<li dir="auto">designed to be <em>unnormalized</em> for fast lookups
+<ul dir="auto">
+<li dir="auto">can be used as data warehouses</li>
+</ul>
+</li>
+<li dir="auto">no joins or subqueries</li>
+<li dir="auto">no FK (only PK)</li>
+<li dir="auto">rows are not ordered in theory (but ordered in practice)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>document store</strong>
+<ul dir="auto">
+<li dir="auto">system ingests full documents of info in a particular format (JSON/BSON)</li>
+<li dir="auto">MongoDB is the most popular
+<ul dir="auto">
+<li dir="auto">allows user to create multiple DBs
+<ul dir="auto">
+<li dir="auto">w/in each DB there can be multiple <em>collections</em> of documents</li>
+<li dir="auto">documents are <em>schemaless</em></li>
+<li dir="auto">documents can be nested in each other (subdocuments)</li>
+</ul>
+</li>
+<li dir="auto">documents <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>⊆</mo></mrow><annotation encoding="application/x-tex">\subseteq</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7719em;vertical-align:-0.136em;"></span><span class="mrel">⊆</span></span></span></span> collections <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>⊆</mo></mrow><annotation encoding="application/x-tex">\subseteq</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7719em;vertical-align:-0.136em;"></span><span class="mrel">⊆</span></span></span></span> databases</li>
+<li dir="auto">example MongoDB query:</li>
+<li dir="auto"><img src="assets/2024-03-08-15-36-38.png" alt="" data-src="assets/2024-03-08-15-36-38.png"></li>
+<li dir="auto">aggregation example:</li>
+<li dir="auto"><img src="assets/2024-03-08-18-18-34.png" alt="" data-src="assets/2024-03-08-18-18-34.png">
+<ul dir="auto">
+<li dir="auto">to group by multiple fields, use a subdocument</li>
+<li dir="auto">to group by all fields, use <code>&quot;_id&quot;=null</code></li>
+</ul>
+</li>
+<li dir="auto">mongoDB vs RDBMS
+<ul dir="auto">
+<li dir="auto">mongo has no joins</li>
+<li dir="auto">lots of redundacy (no concept of normalization)
+<ul dir="auto">
+<li dir="auto">all related data remain together</li>
+<li dir="auto">link to other documents via object IDs, or just subdocuments</li>
+</ul>
+</li>
+<li dir="auto">no schema</li>
+<li dir="auto">data is just big JSON blob</li>
+<li dir="auto">has internal MapReduce to distribute embarrassingly parallel computations</li>
+</ul>
+</li>
+<li dir="auto">mongo's distributed arch
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-03-12-16-33-17.png" alt="" data-src="assets/2024-03-12-16-33-17.png"></li>
+<li dir="auto">so by default config, mongo is CP</li>
+</ul>
+</li>
+<li dir="auto"><strong>ODM</strong> (object document models) - is an API that allows users to use functions calls to access a document store
+<ul dir="auto">
+<li dir="auto">like an ORM (which is instead for relational models)</li>
+<li dir="auto">OxMs support CRUD operations
+<ul dir="auto">
+<li dir="auto">Create, Read, Update, Delete</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>graph stores</strong>
+<ul dir="auto">
+<li dir="auto"><em>neo4j</em> is the most popular</li>
+<li dir="auto"><img src="assets/2024-03-12-17-22-11.png" alt="" data-src="assets/2024-03-12-17-22-11.png"></li>
+<li dir="auto"><img src="assets/2024-03-12-17-22-34.png" alt="" data-src="assets/2024-03-12-17-22-34.png"></li>
+<li dir="auto">Cypher is a querying language (DDL/DML) used for graph stores
+<ul dir="auto">
+<li dir="auto">MATCH specifies a node(-relation-node) pattern for pattern matcing</li>
+<li dir="auto">WHERE is similar to SQL WHERE, but applied to properties of nodes/relationships</li>
+<li dir="auto">some examples
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-03-12-17-23-55.png" alt="" data-src="assets/2024-03-12-17-23-55.png"></li>
+<li dir="auto"><img src="assets/2024-03-12-17-25-04.png" alt="" data-src="assets/2024-03-12-17-25-04.png"></li>
+<li dir="auto"><img src="assets/2024-03-12-17-25-48.png" alt="" data-src="assets/2024-03-12-17-25-48.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">neo4j vs RDBMS
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-03-12-17-26-30.png" alt="" data-src="assets/2024-03-12-17-26-30.png">
+<ul dir="auto">
+<li dir="auto">not distributed due to clustering
+<ul dir="auto">
+<li dir="auto">as clusters grow we may run out of space on a node, but how to split up cluster and remain efficient?</li>
+<li dir="auto">CAP does apply bc not distributed</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">constraints</li>
+<li dir="auto"><img src="assets/2024-03-12-17-27-35.png" alt="" data-src="assets/2024-03-12-17-27-35.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</body>
+</html>

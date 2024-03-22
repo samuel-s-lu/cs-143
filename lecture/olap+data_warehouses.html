@@ -1,0 +1,280 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/default.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markdown-it-texmath/css/texmath.min.css">
+<link rel="stylesheet" href="file:////Users/samuellu/.vscode/extensions/goessner.mdmath-2.7.4/themes/default/style.css">
+
+</head>
+<body class="markdown-body">
+<p dir="auto"><strong>Online Transaction Processing (OLTP)</strong></p>
+<ul dir="auto">
+<li dir="auto">OLTP - designed for frequent interactive use and optimizes many <em>random</em> reads and writes with low latency</li>
+<li dir="auto">and used in production
+<ul dir="auto">
+<li dir="auto">each of these reads and writes is a result of some <em>transaction</em> carried out by a user</li>
+<li dir="auto">production means app or business (opposed to internal use / analytics)</li>
+<li dir="auto"><img src="assets/2024-02-24-18-03-29.png" alt="" data-src="assets/2024-02-24-18-03-29.png"></li>
+</ul>
+</li>
+<li dir="auto">Postgres and other RDBMS are OLTP</li>
+</ul>
+<h3 dir="auto" id="online-analytical-processing-olap">Online Analytical Processing (OLAP)</h3>
+<ul dir="auto">
+<li dir="auto">not meant to be accessed in production, and only by internal users</li>
+<li dir="auto"><em>read-only</em></li>
+<li dir="auto">optimized for very fast, low latency reads
+<ul dir="auto">
+<li dir="auto">random or incremental writes are slow (so better to write in batch)</li>
+<li dir="auto">data in OLAP are usually aggregated or precomputed data
+<ul dir="auto">
+<li dir="auto">easy to SELECT from and read</li>
+<li dir="auto">dimensions (groups) and aggregate function can be specified a priori by a data engineer, or automatically inferred by the system to make all possible groups (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">2^n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6644em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span></span></span></span></span></span></span> dimensions)</li>
+</ul>
+</li>
+<li dir="auto">data in OLAP can also be <em>exploded</em> (denormalized) tables for fast reads
+<ul dir="auto">
+<li dir="auto">joins are computed as the data is inserted</li>
+<li dir="auto">one place where denormalized tables are good</li>
+<li dir="auto">data might be slightly out-of-date</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">users include some negineers, data scientists, business analysts, and other systems
+<ul dir="auto">
+<li dir="auto">users do NOT write ad hoc (randomly) into the system like OLTP</li>
+<li dir="auto">typically data is loaded into the data warehouse using an ETL job during low usage period (overnight)
+<ul dir="auto">
+<li dir="auto">extract from DB, transform, then load into DW
+<ul dir="auto">
+<li dir="auto">extraction from DB can be very costly on the DB
+<ul dir="auto">
+<li dir="auto">if production DB, may cause app to go down</li>
+<li dir="auto">sol:</li>
+<li dir="auto">
+<ol dir="auto">
+<li dir="auto">run ETL against a replica</li>
+</ol>
+</li>
+<li dir="auto">
+<ol start="2" dir="auto">
+<li dir="auto">dual writes: on each write to the DB write to the replica</li>
+</ol>
+</li>
+<li dir="auto"><img src="assets/2024-02-24-18-46-38.png" alt="" data-src="assets/2024-02-24-18-46-38.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">ETL either transfer <em>all</em> of data or only the new data since last update</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">note: OLAP and DW is completely different system than RDBMS/OLTP (diff use cases)
+<ul dir="auto">
+<li dir="auto">but both still typically use SQL</li>
+<li dir="auto">use cases:
+<ul dir="auto">
+<li dir="auto">reporting</li>
+<li dir="auto">dashboarding</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto">conceptually OLAP is visualized as a cube
+<ul dir="auto">
+<li dir="auto">but user still sees and works with tables</li>
+<li dir="auto"><img src="assets/2024-02-24-18-29-05.png" alt="" data-src="assets/2024-02-24-18-29-05.png"></li>
+<li dir="auto">in reality there is usually &gt;3 dimensions, resulting in a <em>hypercube</em></li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-02-24-18-54-35.png" alt="" data-src="assets/2024-02-24-18-54-35.png"></li>
+<li dir="auto"><img src="assets/2024-02-24-18-58-17.png" alt="" data-src="assets/2024-02-24-18-58-17.png"></li>
+</ul>
+<h3 dir="auto" id="olap-operations">OLAP Operations</h3>
+<ul dir="auto">
+<li dir="auto"><strong>Slice</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-18-58-52.png" alt="" data-src="assets/2024-02-24-18-58-52.png"></li>
+</ul>
+</li>
+<li dir="auto"><strong>Dice</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-19-03-40.png" alt="" data-src="assets/2024-02-24-19-03-40.png"></li>
+</ul>
+</li>
+<li dir="auto">typically the distinction between slice and dice are rarely made
+<ul dir="auto">
+<li dir="auto">usually only the term &quot;slice&quot; is used</li>
+</ul>
+</li>
+<li dir="auto"><strong>Rollup</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-19-09-56.png" alt="" data-src="assets/2024-02-24-19-09-56.png"></li>
+<li dir="auto">ROLLUP() in SQL
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-19-13-02.png" alt="" data-src="assets/2024-02-24-19-13-02.png"></li>
+<li dir="auto">output:</li>
+<li dir="auto"><img src="assets/2024-02-24-19-14-07.png" alt="" data-src="assets/2024-02-24-19-14-07.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Drill Down</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-19-54-25.png" alt="" data-src="assets/2024-02-24-19-54-25.png"></li>
+<li dir="auto">drill down thru hierarchies to a finer one</li>
+</ul>
+</li>
+<li dir="auto"><strong>Pivot</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-20-01-56.png" alt="" data-src="assets/2024-02-24-20-01-56.png"></li>
+<li dir="auto"><strong>wide format</strong> - involves multiple <em>columns</em>
+<ul dir="auto">
+<li dir="auto">pros:
+<ul dir="auto">
+<li dir="auto">less redundancy</li>
+<li dir="auto">easy to understand</li>
+<li dir="auto">common in spreadsheets</li>
+</ul>
+</li>
+<li dir="auto">cons:
+<ul dir="auto">
+<li dir="auto">NULLs</li>
+<li dir="auto">format is inflexible
+<ul dir="auto">
+<li dir="auto">e.g. have to alter table if we add HWs</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>long format</strong>
+<ul dir="auto">
+<li dir="auto">common in software engineering</li>
+<li dir="auto">pros:
+<ul dir="auto">
+<li dir="auto">flexible (easy to add another HW)</li>
+<li dir="auto">no NULLs</li>
+</ul>
+</li>
+<li dir="auto">cons:
+<ul dir="auto">
+<li dir="auto">redundancy</li>
+<li dir="auto">harder to understand</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>long to wide conversion</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-20-10-17.png" alt="" data-src="assets/2024-02-24-20-10-17.png"></li>
+<li dir="auto"><img src="assets/2024-02-24-20-11-21.png" alt="" data-src="assets/2024-02-24-20-11-21.png"></li>
+</ul>
+</li>
+<li dir="auto"><strong>wide to long conversion</strong>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-20-16-25.png" alt="" data-src="assets/2024-02-24-20-16-25.png"></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="schemas-in-data-warehouses">Schemas in Data Warehouses</h3>
+<ul dir="auto">
+<li dir="auto">types of tables in DW
+<ul dir="auto">
+<li dir="auto"><strong>fact table</strong> - contains quantitative data to be analyzed
+<ul dir="auto">
+<li dir="auto">typically denormalized</li>
+<li dir="auto">e.g. trainsuid (key), revenue</li>
+</ul>
+</li>
+<li dir="auto"><strong>dimension table</strong> - contains data about attributes of each of these facts
+<ul dir="auto">
+<li dir="auto">e.g. customer info for transaction, metadata</li>
+</ul>
+</li>
+</ul>
+</li>
+<li dir="auto"><strong>Star Schema</strong>
+<ul dir="auto">
+<li dir="auto">contains a single fact table and several dimension tables that must be joined to it to get a result</li>
+<li dir="auto"><img src="assets/2024-02-24-20-20-37.png" alt="" data-src="assets/2024-02-24-20-20-37.png"></li>
+</ul>
+</li>
+<li dir="auto"><strong>Snowflake Schema</strong>
+<ul dir="auto">
+<li dir="auto">has a central fact table, and several dimension tables that must be joined to each other to get a full result / describe the fact</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-02-24-20-22-51.png" alt="" data-src="assets/2024-02-24-20-22-51.png"></li>
+<li dir="auto"><strong>Galaxy/Constellation Schema</strong>
+<ul dir="auto">
+<li dir="auto">contains multiple fact tables that share some dimension tables among them
+<ul dir="auto">
+<li dir="auto">closest to RDBMS</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-02-24-20-28-31.png" alt="" data-src="assets/2024-02-24-20-28-31.png"></li>
+</ul>
+</li>
+</ul>
+<p dir="auto"><strong>Summary of OLAP</strong></p>
+<ul dir="auto">
+<li dir="auto"><img src="assets/2024-02-24-20-54-41.png" alt="" data-src="assets/2024-02-24-20-54-41.png"></li>
+</ul>
+<p dir="auto"><strong>Data System Architecture</strong></p>
+<ul dir="auto">
+<li dir="auto">usually there are multiple copies of the same database
+<ul dir="auto">
+<li dir="auto">most commonly:
+<ul dir="auto">
+<li dir="auto"><em>production database</em> - for apps, not humans</li>
+<li dir="auto"><em>development database</em> - used to test new features or process diagnostics</li>
+<li dir="auto">a replica for heavy reads</li>
+</ul>
+</li>
+<li dir="auto">synced with either a nightly job (ETL), a message bus that multiplexes data ops, or using advanced replication options in RDBMS (e.g. PostregreSQL supports replication)</li>
+<li dir="auto"><img src="assets/2024-02-24-21-09-57.png" alt="" data-src="assets/2024-02-24-21-09-57.png"></li>
+<li dir="auto"><img src="assets/2024-02-24-21-07-42.png" alt="" data-src="assets/2024-02-24-21-07-42.png"></li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto" id="data-lakes">Data Lakes</h3>
+<ul dir="auto">
+<li dir="auto">an architecture where data is stored in multiple data storage systems and in different formats
+<ul dir="auto">
+<li dir="auto">can be queried from a single system</li>
+<li dir="auto">an alternative to DW
+<ul dir="auto">
+<li dir="auto">do not require up-front effort to preprocess data, but more effort when creating queries</li>
+</ul>
+</li>
+<li dir="auto"><img src="assets/2024-02-24-21-16-25.png" alt="" data-src="assets/2024-02-24-21-16-25.png"></li>
+</ul>
+</li>
+<li dir="auto"><strong>Hadoop Distributed File System (HDFW)</strong>
+<ul dir="auto">
+<li dir="auto">the most successful implementation of data lake</li>
+<li dir="auto">highly scalable distributed file system that allows user to store any kind of raw data
+<ul dir="auto">
+<li dir="auto">adding more storage via disks/nodes is easy</li>
+</ul>
+</li>
+<li dir="auto">has redundancy and authorization model</li>
+<li dir="auto">allows multiple nodes to read data from it</li>
+<li dir="auto">powers Hadoop Map-Reduce</li>
+<li dir="auto">a storage option for Spark</li>
+</ul>
+</li>
+</ul>
+
+</body>
+</html>
